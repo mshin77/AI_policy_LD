@@ -1,0 +1,6 @@
+"0","#| code-fold: false"
+"0","texts <- sapply(toks_removed_common, paste, collapse = "" "")"
+"0","parsed <- spacy_parse(x = texts, lemma = TRUE, entity = FALSE, pos = FALSE)"
+"0","toks_lemmatized <- as.tokens(parsed, use_lemma = TRUE)"
+"0","dfm <- dfm(toks_lemmatized)"
+"0","dfm_freq <- plot_word_frequency(dfm, n = 20)"

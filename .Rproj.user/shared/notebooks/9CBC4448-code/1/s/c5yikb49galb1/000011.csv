@@ -1,0 +1,5 @@
+"0","#| code-fold: false"
+"0","stopwords <- stopwords(""en"", source = ""snowball"")"
+"0","toks_removed <- tokens_remove(tokens_compound, pattern = stopwords, verbose = FALSE)"
+"0","dfm_init <- dfm(toks_removed)"
+"0","plot_word_frequency(dfm_init, n = 40)"
