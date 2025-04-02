@@ -1,19 +1,276 @@
 ---
 title: "Addressing the void of AI policies in education for individuals with learning disabilities"
-date: ""
+date: "`r Sys.Date()`"
 format:
   html:
-    toc: false
     fontawesome: true
+    code-fold: true
+    code-tools: true
+    toc: true
 ---
 
 The website contains supplemental materials and code used to analyze text data in Authors (2025).
 
-<div style="position: relative; left: 27%; display: inline-block;">
-  <img src="images/logo.png" alt="Logo" width="400" style="display: block;" />
-  <small style="position: absolute; bottom: 0; right: 0;
-                 background: rgba(255, 255, 255, 0.7);
-                 padding: 2px 4px;">
-    Logo created by OpenAI's Sora
-  </small>
-</div>
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+```
+
+
+## Set Up
+
+#### Load R Packages
+
+```{r}
+suppressPackageStartupMessages({
+    library(tidyr)
+    library(dplyr)
+    library(readxl)
+    library(brms)
+    library(gtsummary)
+    library(officer)
+    library(flextable)
+    library(ggplot2)
+    library(quanteda)
+    library(stopwords)
+    library(TextAnalysisR)
+    library(spacyr)
+    library(htmlwidgets)
+})
+```
+
+#### Load Dataset
+
+```{r}
+#| code-fold: false
+# data <- read_excel("data/PolicyData.xlsx")
+load("data/ai_ld_data.rda")
+```
+
+## Preporcess Text Data
+
+#### Unite Text Columns
+
+```{r, eval=FALSE}
+#| code-fold: false
+united_tbl <- unite_text_cols(data, 
+                              listed_vars = paste0("Text", 1:22))
+                              
+united_tbl <- united_tbl %>% 
+   dplyr::select(-all_of(paste0("Text", 1:22)))
+                              
+openxlsx::write.xlsx(united_tbl, "data/united_tbl.xlsx")                             
+```
+
+#### Segment a Corpus Into Tokens
+
+```{r, eval=FALSE}
+#| code-fold: false
+tokens <- preprocess_texts(united_tbl, text_field = "united_texts", verbose = FALSE)
+```
+
+#### Detect Multi-Word Expressions
+
+```{r, eval=FALSE}
+#| code-fold: false
+tokens_collocations <- detect_multi_word_expressions(tokens, size = 2:5, min_count = 2)
+tokens_dict <- quanteda::dictionary(
+list(custom = 
+c("intelligence systems", 
+"artificial intelligence", 
+"civil rights",
+"federal government",
+"automated systems",
+"decision making")))
+
+```
+
+#### Process Tokens With Compound Words
+
+```{r, eval=FALSE}
+#| code-fold: false
+compound_tokens <- function(tokens, dict) {
+  quanteda::tokens_compound(
+    tokens,
+    pattern = dict,
+    concatenator = "_",
+    valuetype = "glob",
+    window = 0,
+    case_insensitive = TRUE,
+    join = TRUE,
+    keep_unigrams = FALSE,
+    verbose = TRUE
+  )
+}
+
+tokens_compound <- compound_tokens(tokens, tokens_dict)
+```
+
+#### Word Frequency
+
+```{r, eval=FALSE}
+#| code-fold: false
+dfm_object <- dfm(tokens_compound)
+
+word_frequency_plot <- plot_word_frequency(dfm_object, n = 20)
+```
+
+#### Remove Predefined Stopwords
+
+```{r, eval=FALSE}
+#| code-fold: false
+stopwords <- stopwords("en", source = "snowball")
+toks_removed <- tokens_remove(tokens_compound, pattern = stopwords, verbose = FALSE)
+dfm_init <- dfm(toks_removed)
+plot_word_frequency(dfm_init, n = 40)
+```
+
+#### Remove Common Words in the Dataset
+
+```{r, eval=FALSE}
+#| code-fold: false
+common_words <- c("na", "may", "can", "['’]s")
+toks_removed_common <- tokens_remove(toks_removed, 
+                                     pattern = common_words, 
+                                     valuetype = "regex", 
+                                     verbose = FALSE)
+dfm_removed <- dfm(toks_removed_common)
+plot_word_frequency(dfm_removed, n = 20)
+```
+
+#### Lemmatize Tokens
+
+##### Word frequency  
+
+```{r, eval=FALSE}
+#| code-fold: false
+texts <- sapply(toks_removed_common, paste, collapse = " ")
+parsed <- spacy_parse(x = texts, lemma = TRUE, entity = FALSE, pos = FALSE)
+toks_lemmatized <- as.tokens(parsed, use_lemma = TRUE)
+dfm <- dfm(toks_lemmatized)
+dfm_freq <- plot_word_frequency(dfm, n = 20)
+```
+
+```{r, echo=FALSE}
+dfm_freq
+```
+
+## Optimal Topic Numbers 
+
+#### Model Diagnostics 
+
+```{r, eval = FALSE}
+
+dfm@docvars$Disability <- as.factor(data$Disability)
+dfm@docvars$LD <- as.factor(data$LD)
+
+evaluate_optimal_topic_number(
+  dfm_object = dfm,
+  topic_range = 5:30,
+  max.em.its = 75,
+  categorical_var = c("Disability", "LD"),
+  continuous_var = "",
+  height = 600,
+  width = 800,
+  verbose = FALSE)
+```
+
+![](images/model_diagnostics.png){fig-align="center" width="700"}
+
+## Structural Topic Modeling
+
+```{r, eval = FALSE}
+out <- quanteda::convert(dfm, to = "stm")
+
+topic_model <- stm(
+  data = out$meta,
+  documents = out$documents,
+  vocab = out$vocab,
+  max.em.its = 75,
+  init.type = "Spectral",
+  K = 14,
+  prevalence = ~ c("Disability", "LD"), 
+  verbose = FALSE,
+  seed = 1234)
+
+top_topic_terms <- TextAnalysisR::select_top_topic_terms(
+  stm_model = topic_model,
+  top_term_n = 10,
+  verbose = FALSE
+)
+
+top_topic_terms %>%
+  mutate_if(is.numeric, ~ round(., 3)) %>%
+      DT::datatable(
+      rownames = FALSE,
+      extensions = 'Buttons',
+      options = list(
+        scrollX = TRUE,
+        scrollY = "400px",
+        width = "80%",
+        dom = 'Bfrtip',
+        buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
+      )
+    ) %>%
+    DT::formatStyle(
+      columns = c("topic", "term", "beta"),
+      fontSize = '16px'
+    )
+```
+
+#### Generate Policy Topic Labels Using OpenAI’s API
+
+```{r, eval = FALSE}
+#| code-fold: false
+# Load the Open AI API key from the .env file in the working directory
+
+top_labeled_topic_terms <- generate_topic_labels(
+  top_topic_terms,
+  model = "gpt-3.5-turbo",
+  temperature = 0.5,
+  verbose = FALSE)
+```
+
+```{r, echo=FALSE}
+top_labeled_topic_terms %>%
+  mutate_if(is.numeric, ~ round(., 3)) %>%
+      DT::datatable(
+      rownames = FALSE,
+      extensions = 'Buttons',
+      options = list(
+        scrollX = TRUE,
+        scrollY = "400px",
+        width = "80%",
+        dom = 'Bfrtip',
+        buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
+      )
+    ) %>%
+    DT::formatStyle(
+      columns = c("topic", "topic_label", "term", "beta"),
+      fontSize = '16px'
+    )
+```
+
+```{r}
+# openxlsx::write.xlsx(top_labeled_topic_terms, "data/top_labeled_topic_terms.xlsx")
+```
+
+#### Probability of Words Observed in Each Topic (Beta)
+
+```{r, eval = FALSE}
+#| code-fold: false
+word_probability_plot <- word_probability_plot(
+  top_labeled_topic_terms,
+  topic_label = "topic_label",
+  ncol = 2,
+  height = 1800,
+  width = 1500)
+```
+
+```{r, echo=FALSE}
+word_probability_plot
+```
+
+```{r, echo=FALSE}
+save(dfm, dfm_freq, out, top_labeled_topic_terms, word_probability_plot, topic_model, file = "data/ai_ld_data.rda")
+```
+

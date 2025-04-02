@@ -6,6 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="dcterms.date" content="2025-04-02">
 
 <title>Addressing the void of AI policies in education for individuals with learning disabilities</title>
 <style>
@@ -20,6 +21,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -33,19 +68,74 @@ ul.task-list li input[type="checkbox"] {
 <script src="index_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="index_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="index_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="index_files/libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+
+<script src="index_files/libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+
+<link href="index_files/libs/datatables-css-0.0.0/datatables-crosstalk.css" rel="stylesheet">
+
+<script src="index_files/libs/datatables-binding-0.33/datatables.js"></script>
+
+<script src="index_files/libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+
+<link href="index_files/libs/dt-core-1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
+
+<link href="index_files/libs/dt-core-1.13.6/css/jquery.dataTables.extra.css" rel="stylesheet">
+
+<script src="index_files/libs/dt-core-1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script src="index_files/libs/jszip-1.13.6/jszip.min.js"></script>
+
+<script src="index_files/libs/pdfmake-1.13.6/pdfmake.js"></script>
+
+<script src="index_files/libs/pdfmake-1.13.6/vfs_fonts.js"></script>
+
+<link href="index_files/libs/dt-ext-buttons-1.13.6/css/buttons.dataTables.min.css" rel="stylesheet">
+
+<script src="index_files/libs/dt-ext-buttons-1.13.6/js/dataTables.buttons.min.js"></script>
+
+<script src="index_files/libs/dt-ext-buttons-1.13.6/js/buttons.html5.min.js"></script>
+
+<script src="index_files/libs/dt-ext-buttons-1.13.6/js/buttons.colVis.min.js"></script>
+
+<script src="index_files/libs/dt-ext-buttons-1.13.6/js/buttons.print.min.js"></script>
+
+<link href="index_files/libs/crosstalk-1.2.1/css/crosstalk.min.css" rel="stylesheet">
+
+<script src="index_files/libs/crosstalk-1.2.1/js/crosstalk.min.js"></script>
+
+<script src="index_files/libs/plotly-binding-4.10.4/plotly.js"></script>
+
+<script src="index_files/libs/typedarray-0.1/typedarray.min.js"></script>
+
+<link href="index_files/libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet">
+
+<script src="index_files/libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
+
 
 
 </head>
 
-<body class="fullcontent">
+<body>
 
 <div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
-
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#set-up" id="toc-set-up" class="nav-link active" data-scroll-target="#set-up">Set Up</a></li>
+  <li><a href="#preporcess-text-data" id="toc-preporcess-text-data" class="nav-link" data-scroll-target="#preporcess-text-data">Preporcess Text Data</a></li>
+  <li><a href="#optimal-topic-numbers" id="toc-optimal-topic-numbers" class="nav-link" data-scroll-target="#optimal-topic-numbers">Optimal Topic Numbers</a></li>
+  <li><a href="#structural-topic-modeling" id="toc-structural-topic-modeling" class="nav-link" data-scroll-target="#structural-topic-modeling">Structural Topic Modeling</a></li>
+  </ul>
+</nav>
+</div>
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Addressing the void of AI policies in education for individuals with learning disabilities</h1>
+<div class="quarto-title-block"><div><h1 class="title">Addressing the void of AI policies in education for individuals with learning disabilities</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
 </div>
 
 
@@ -53,6 +143,12 @@ ul.task-list li input[type="checkbox"] {
 <div class="quarto-title-meta">
 
     
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">April 2, 2025</p>
+    </div>
+  </div>
   
     
   </div>
@@ -63,11 +159,260 @@ ul.task-list li input[type="checkbox"] {
 
 
 <p>The website contains supplemental materials and code used to analyze text data in Authors (2025).</p>
-<div style="position: relative; left: 27%; display: inline-block;">
-<p><img src="images/logo.png" alt="Logo" width="400" style="display: block;"> <small style="position: absolute; bottom: 0; right: 0;
-                 background: rgba(255, 255, 255, 0.7);
-                 padding: 2px 4px;"> Logo created by OpenAI’s Sora </small></p>
+<section id="set-up" class="level2">
+<h2 class="anchored" data-anchor-id="set-up">Set Up</h2>
+<section id="load-r-packages" class="level4">
+<h4 class="anchored" data-anchor-id="load-r-packages">Load R Packages</h4>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>({</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(tidyr)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(dplyr)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(readxl)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(brms)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(gtsummary)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(officer)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(flextable)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(quanteda)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(stopwords)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(TextAnalysisR)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(spacyr)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(htmlwidgets)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
+</section>
+<section id="load-dataset" class="level4">
+<h4 class="anchored" data-anchor-id="load-dataset">Load Dataset</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># data &lt;- read_excel("data/PolicyData.xlsx")</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"data/ai_ld_data.rda"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="preporcess-text-data" class="level2">
+<h2 class="anchored" data-anchor-id="preporcess-text-data">Preporcess Text Data</h2>
+<section id="unite-text-columns" class="level4">
+<h4 class="anchored" data-anchor-id="unite-text-columns">Unite Text Columns</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>united_tbl <span class="ot">&lt;-</span> <span class="fu">unite_text_cols</span>(data, </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>                              <span class="at">listed_vars =</span> <span class="fu">paste0</span>(<span class="st">"Text"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">22</span>))</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>                              </span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>united_tbl <span class="ot">&lt;-</span> united_tbl <span class="sc">%&gt;%</span> </span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>   dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span><span class="fu">all_of</span>(<span class="fu">paste0</span>(<span class="st">"Text"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">22</span>)))</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>                              </span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>openxlsx<span class="sc">::</span><span class="fu">write.xlsx</span>(united_tbl, <span class="st">"data/united_tbl.xlsx"</span>)                             </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="segment-a-corpus-into-tokens" class="level4">
+<h4 class="anchored" data-anchor-id="segment-a-corpus-into-tokens">Segment a Corpus Into Tokens</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>tokens <span class="ot">&lt;-</span> <span class="fu">preprocess_texts</span>(united_tbl, <span class="at">text_field =</span> <span class="st">"united_texts"</span>, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="detect-multi-word-expressions" class="level4">
+<h4 class="anchored" data-anchor-id="detect-multi-word-expressions">Detect Multi-Word Expressions</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>tokens_collocations <span class="ot">&lt;-</span> <span class="fu">detect_multi_word_expressions</span>(tokens, <span class="at">size =</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">5</span>, <span class="at">min_count =</span> <span class="dv">2</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>tokens_dict <span class="ot">&lt;-</span> quanteda<span class="sc">::</span><span class="fu">dictionary</span>(</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">list</span>(<span class="at">custom =</span> </span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="st">"intelligence systems"</span>, </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="st">"artificial intelligence"</span>, </span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="st">"civil rights"</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="st">"federal government"</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="st">"automated systems"</span>,</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="st">"decision making"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="process-tokens-with-compound-words" class="level4">
+<h4 class="anchored" data-anchor-id="process-tokens-with-compound-words">Process Tokens With Compound Words</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>compound_tokens <span class="ot">&lt;-</span> <span class="cf">function</span>(tokens, dict) {</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  quanteda<span class="sc">::</span><span class="fu">tokens_compound</span>(</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    tokens,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">pattern =</span> dict,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">concatenator =</span> <span class="st">"_"</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">valuetype =</span> <span class="st">"glob"</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">window =</span> <span class="dv">0</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">case_insensitive =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">join =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">keep_unigrams =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">verbose =</span> <span class="cn">TRUE</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>tokens_compound <span class="ot">&lt;-</span> <span class="fu">compound_tokens</span>(tokens, tokens_dict)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="word-frequency" class="level4">
+<h4 class="anchored" data-anchor-id="word-frequency">Word Frequency</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>dfm_object <span class="ot">&lt;-</span> <span class="fu">dfm</span>(tokens_compound)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>word_frequency_plot <span class="ot">&lt;-</span> <span class="fu">plot_word_frequency</span>(dfm_object, <span class="at">n =</span> <span class="dv">20</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="remove-predefined-stopwords" class="level4">
+<h4 class="anchored" data-anchor-id="remove-predefined-stopwords">Remove Predefined Stopwords</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>stopwords <span class="ot">&lt;-</span> <span class="fu">stopwords</span>(<span class="st">"en"</span>, <span class="at">source =</span> <span class="st">"snowball"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>toks_removed <span class="ot">&lt;-</span> <span class="fu">tokens_remove</span>(tokens_compound, <span class="at">pattern =</span> stopwords, <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>dfm_init <span class="ot">&lt;-</span> <span class="fu">dfm</span>(toks_removed)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_word_frequency</span>(dfm_init, <span class="at">n =</span> <span class="dv">40</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="remove-common-words-in-the-dataset" class="level4">
+<h4 class="anchored" data-anchor-id="remove-common-words-in-the-dataset">Remove Common Words in the Dataset</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>common_words <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"na"</span>, <span class="st">"may"</span>, <span class="st">"can"</span>, <span class="st">"['’]s"</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>toks_removed_common <span class="ot">&lt;-</span> <span class="fu">tokens_remove</span>(toks_removed, </span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">pattern =</span> common_words, </span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">valuetype =</span> <span class="st">"regex"</span>, </span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>dfm_removed <span class="ot">&lt;-</span> <span class="fu">dfm</span>(toks_removed_common)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_word_frequency</span>(dfm_removed, <span class="at">n =</span> <span class="dv">20</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="lemmatize-tokens" class="level4">
+<h4 class="anchored" data-anchor-id="lemmatize-tokens">Lemmatize Tokens</h4>
+<section id="word-frequency-1" class="level5">
+<h5 class="anchored" data-anchor-id="word-frequency-1">Word frequency</h5>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>texts <span class="ot">&lt;-</span> <span class="fu">sapply</span>(toks_removed_common, paste, <span class="at">collapse =</span> <span class="st">" "</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>parsed <span class="ot">&lt;-</span> <span class="fu">spacy_parse</span>(<span class="at">x =</span> texts, <span class="at">lemma =</span> <span class="cn">TRUE</span>, <span class="at">entity =</span> <span class="cn">FALSE</span>, <span class="at">pos =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>toks_lemmatized <span class="ot">&lt;-</span> <span class="fu">as.tokens</span>(parsed, <span class="at">use_lemma =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>dfm <span class="ot">&lt;-</span> <span class="fu">dfm</span>(toks_lemmatized)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>dfm_freq <span class="ot">&lt;-</span> <span class="fu">plot_word_frequency</span>(dfm, <span class="at">n =</span> <span class="dv">20</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="optimal-topic-numbers" class="level2">
+<h2 class="anchored" data-anchor-id="optimal-topic-numbers">Optimal Topic Numbers</h2>
+<section id="model-diagnostics" class="level4">
+<h4 class="anchored" data-anchor-id="model-diagnostics">Model Diagnostics</h4>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>dfm<span class="sc">@</span>docvars<span class="sc">$</span>Disability <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(data<span class="sc">$</span>Disability)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>dfm<span class="sc">@</span>docvars<span class="sc">$</span>LD <span class="ot">&lt;-</span> <span class="fu">as.factor</span>(data<span class="sc">$</span>LD)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="fu">evaluate_optimal_topic_number</span>(</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">dfm_object =</span> dfm,</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">topic_range =</span> <span class="dv">5</span><span class="sc">:</span><span class="dv">30</span>,</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">max.em.its =</span> <span class="dv">75</span>,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">categorical_var =</span> <span class="fu">c</span>(<span class="st">"Disability"</span>, <span class="st">"LD"</span>),</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">continuous_var =</span> <span class="st">""</span>,</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">600</span>,</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">800</span>,</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="images/model_diagnostics.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="700"></p>
+</figure>
+</div>
+</section>
+</section>
+<section id="structural-topic-modeling" class="level2">
+<h2 class="anchored" data-anchor-id="structural-topic-modeling">Structural Topic Modeling</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>out <span class="ot">&lt;-</span> quanteda<span class="sc">::</span><span class="fu">convert</span>(dfm, <span class="at">to =</span> <span class="st">"stm"</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>topic_model <span class="ot">&lt;-</span> <span class="fu">stm</span>(</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> out<span class="sc">$</span>meta,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">documents =</span> out<span class="sc">$</span>documents,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">vocab =</span> out<span class="sc">$</span>vocab,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">max.em.its =</span> <span class="dv">75</span>,</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">init.type =</span> <span class="st">"Spectral"</span>,</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">K =</span> <span class="dv">14</span>,</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">prevalence =</span> <span class="sc">~</span> <span class="fu">c</span>(<span class="st">"Disability"</span>, <span class="st">"LD"</span>), </span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">verbose =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">1234</span>)</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>top_topic_terms <span class="ot">&lt;-</span> TextAnalysisR<span class="sc">::</span><span class="fu">select_top_topic_terms</span>(</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">stm_model =</span> topic_model,</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">top_term_n =</span> <span class="dv">10</span>,</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">verbose =</span> <span class="cn">FALSE</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>top_topic_terms <span class="sc">%&gt;%</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate_if</span>(is.numeric, <span class="sc">~</span> <span class="fu">round</span>(., <span class="dv">3</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>      DT<span class="sc">::</span><span class="fu">datatable</span>(</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>      <span class="at">rownames =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>      <span class="at">extensions =</span> <span class="st">'Buttons'</span>,</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>      <span class="at">options =</span> <span class="fu">list</span>(</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>        <span class="at">scrollX =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>        <span class="at">scrollY =</span> <span class="st">"400px"</span>,</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>        <span class="at">width =</span> <span class="st">"80%"</span>,</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>        <span class="at">dom =</span> <span class="st">'Bfrtip'</span>,</span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>        <span class="at">buttons =</span> <span class="fu">c</span>(<span class="st">'copy'</span>, <span class="st">'csv'</span>, <span class="st">'excel'</span>, <span class="st">'pdf'</span>, <span class="st">'print'</span>)</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span></span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>    DT<span class="sc">::</span><span class="fu">formatStyle</span>(</span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>      <span class="at">columns =</span> <span class="fu">c</span>(<span class="st">"topic"</span>, <span class="st">"term"</span>, <span class="st">"beta"</span>),</span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>      <span class="at">fontSize =</span> <span class="st">'16px'</span></span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<section id="generate-policy-topic-labels-using-openais-api" class="level4">
+<h4 class="anchored" data-anchor-id="generate-policy-topic-labels-using-openais-api">Generate Policy Topic Labels Using OpenAI’s API</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the Open AI API key from the .env file in the working directory</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>top_labeled_topic_terms <span class="ot">&lt;-</span> <span class="fu">generate_topic_labels</span>(</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  top_topic_terms,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">model =</span> <span class="st">"gpt-3.5-turbo"</span>,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">temperature =</span> <span class="fl">0.5</span>,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">verbose =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div class="datatables html-widget html-fill-item" id="htmlwidget-e8e073e39c83f7cd6384" style="width:100%;height:auto;"></div>
+<script type="application/json" data-for="htmlwidget-e8e073e39c83f7cd6384">{"x":{"filter":"none","vertical":false,"extensions":["Buttons"],"data":[["Artificial intelligence in education research and development","Artificial intelligence in education research and development","Artificial intelligence in education research and development","Artificial intelligence in education research and development","Artificial intelligence in education research and development","Artificial intelligence in education research and development","Artificial intelligence in education research and development","Artificial intelligence in education research and development","Artificial intelligence in education research and development","Artificial intelligence in education research and development","Student-centered AI policy for inclusive education","Student-centered AI policy for inclusive education","Student-centered AI policy for inclusive education","Student-centered AI policy for inclusive education","Student-centered AI policy for inclusive education","Student-centered AI policy for inclusive education","Student-centered AI policy for inclusive education","Student-centered AI policy for inclusive education","Student-centered AI policy for inclusive education","Student-centered AI policy for inclusive education","Word recognition software for grade-level accommodations","Word recognition software for grade-level accommodations","Word recognition software for grade-level accommodations","Word recognition software for grade-level accommodations","Word recognition software for grade-level accommodations","Word recognition software for grade-level accommodations","Word recognition software for grade-level accommodations","Word recognition software for grade-level accommodations","Word recognition software for grade-level accommodations","Word recognition software for grade-level accommodations","Defense initiative leveraging artificial intelligence for security.","Defense initiative leveraging artificial intelligence for security.","Defense initiative leveraging artificial intelligence for security.","Defense initiative leveraging artificial intelligence for security.","Defense initiative leveraging artificial intelligence for security.","Defense initiative leveraging artificial intelligence for security.","Defense initiative leveraging artificial intelligence for security.","Defense initiative leveraging artificial intelligence for security.","Defense initiative leveraging artificial intelligence for security.","Defense initiative leveraging artificial intelligence for security.","Artificial intelligence in student academic integrity","Artificial intelligence in student academic integrity","Artificial intelligence in student academic integrity","Artificial intelligence in student academic integrity","Artificial intelligence in student academic integrity","Artificial intelligence in student academic integrity","Artificial intelligence in student academic integrity","Artificial intelligence in student academic integrity","Artificial intelligence in student academic integrity","Artificial intelligence in student academic integrity","Artificial intelligence for inclusive user expertise","Artificial intelligence for inclusive user expertise","Artificial intelligence for inclusive user expertise","Artificial intelligence for inclusive user expertise","Artificial intelligence for inclusive user expertise","Artificial intelligence for inclusive user expertise","Artificial intelligence for inclusive user expertise","Artificial intelligence for inclusive user expertise","Artificial intelligence for inclusive user expertise","Artificial intelligence for inclusive user expertise","Student-centered AI software for school investigations","Student-centered AI software for school investigations","Student-centered AI software for school investigations","Student-centered AI software for school investigations","Student-centered AI software for school investigations","Student-centered AI software for school investigations","Student-centered AI software for school investigations","Student-centered AI software for school investigations","Student-centered AI software for school investigations","Student-centered AI software for school investigations","Data utilization in ethical surveillance systems","Data utilization in ethical surveillance systems","Data utilization in ethical surveillance systems","Data utilization in ethical surveillance systems","Data utilization in ethical surveillance systems","Data utilization in ethical surveillance systems","Data utilization in ethical surveillance systems","Data utilization in ethical surveillance systems","Data utilization in ethical surveillance systems","Data utilization in ethical surveillance systems","Artificial Intelligence Leadership in Organizational Settings","Artificial Intelligence Leadership in Organizational Settings","Artificial Intelligence Leadership in Organizational Settings","Artificial Intelligence Leadership in Organizational Settings","Artificial Intelligence Leadership in Organizational Settings","Artificial Intelligence Leadership in Organizational Settings","Artificial Intelligence Leadership in Organizational Settings","Artificial Intelligence Leadership in Organizational Settings","Artificial Intelligence Leadership in Organizational Settings","Artificial Intelligence Leadership in Organizational Settings","Artificial intelligence for student learning support","Artificial intelligence for student learning support","Artificial intelligence for student learning support","Artificial intelligence for student learning support","Artificial intelligence for student learning support","Artificial intelligence for student learning support","Artificial intelligence for student learning support","Artificial intelligence for student learning support","Artificial intelligence for student learning support","Artificial intelligence for student learning support","Artificial Intelligence in Risk Management Systems","Artificial Intelligence in Risk Management Systems","Artificial Intelligence in Risk Management Systems","Artificial Intelligence in Risk Management Systems","Artificial Intelligence in Risk Management Systems","Artificial Intelligence in Risk Management Systems","Artificial Intelligence in Risk Management Systems","Artificial Intelligence in Risk Management Systems","Artificial Intelligence in Risk Management Systems","Artificial Intelligence in Risk Management Systems","Education-focused AI tools for student learning","Education-focused AI tools for student learning","Education-focused AI tools for student learning","Education-focused AI tools for student learning","Education-focused AI tools for student learning","Education-focused AI tools for student learning","Education-focused AI tools for student learning","Education-focused AI tools for student learning","Education-focused AI tools for student learning","Education-focused AI tools for student learning","Student-centered AI policy for inclusive education","Student-centered AI policy for inclusive education","Student-centered AI policy for inclusive education","Student-centered AI policy for inclusive education","Student-centered AI policy for inclusive education","Student-centered AI policy for inclusive education","Student-centered AI policy for inclusive education","Student-centered AI policy for inclusive education","Student-centered AI policy for inclusive education","Student-centered AI policy for inclusive education","Inclusive AI in Education Policy Implementation","Inclusive AI in Education Policy Implementation","Inclusive AI in Education Policy Implementation","Inclusive AI in Education Policy Implementation","Inclusive AI in Education Policy Implementation","Inclusive AI in Education Policy Implementation","Inclusive AI in Education Policy Implementation","Inclusive AI in Education Policy Implementation","Inclusive AI in Education Policy Implementation","Inclusive AI in Education Policy Implementation"],[1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,5,6,6,6,6,6,6,6,6,6,6,7,7,7,7,7,7,7,7,7,7,8,8,8,8,8,8,8,8,8,8,9,9,9,9,9,9,9,9,9,9,10,10,10,10,10,10,10,10,10,10,11,11,11,11,11,11,11,11,11,11,12,12,12,12,12,12,12,12,12,12,13,13,13,13,13,13,13,13,13,13,14,14,14,14,14,14,14,14,14,14],["education","relate","artificial_intelligence","research","include","field","artificial_intelligence_systems","program","science","development","ai","student","disability","policy","technology","education","school","online","monitor","activity","w.a","d","i","read","word","software","use","write","accommodation","grade","artificial_intelligence","center","defense","shall","initiative","section","sec","paragraph","report","act","student","ai","use","i","d","document","artificial_intelligence","school","work","cheat","ai","disability","people","use","system","user","expert","image","bias","technology","student","school","use","base","ai","software","ocr","complaint","investigation","example","datum","use","system","include","sensitive","domain","relate","surveillance","right","individual","artificial_intelligence","shall","term","institute","secretary","artificial_intelligence_systems","support","director","subsection","include","ai","student","system","use","learn","model","human","need","must","teacher","ai","use","risk","system","include","technology","law","mean","federal_government","term","ai","developer","use","student","risk","education","learn","product","resource","educator","ai","student","disability","policy","technology","education","school","online","monitor","activity","enormous","ai","student","education","technology","policy","use","school","disability","take"],[0.054,0.036,0.036,0.033,0.027,0.027,0.024,0.021,0.021,0.018,0.052,0.042,0.028,0.023,0.023,0.023,0.019,0.014,0.014,0.014,0.062,0.026,0.026,0.019,0.017,0.015,0.015,0.013,0.013,0.013,0.043,0.027,0.025,0.018,0.017,0.016,0.014,0.014,0.013,0.013,0.042,0.035,0.033,0.026,0.024,0.021,0.014,0.014,0.012,0.012,0.061,0.04,0.034,0.02,0.013,0.01,0.01,0.008999999999999999,0.008999999999999999,0.008,0.066,0.034,0.019,0.018,0.017,0.015,0.013,0.012,0.011,0.011,0.028,0.026,0.023,0.018,0.014,0.012,0.011,0.011,0.01,0.008999999999999999,0.038,0.017,0.016,0.015,0.015,0.014,0.012,0.011,0.011,0.011,0.049,0.023,0.016,0.015,0.012,0.012,0.01,0.01,0.01,0.01,0.04,0.026,0.012,0.012,0.01,0.008999999999999999,0.008,0.008,0.008,0.008,0.045,0.019,0.015,0.015,0.013,0.01,0.008999999999999999,0.008,0.008,0.008,0.052,0.042,0.028,0.023,0.023,0.023,0.019,0.014,0.014,0.014,0.308,0.048,0.045,0.032,0.031,0.024,0.023,0.022,0.019,0.018]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th>topic_label<\/th>\n      <th>topic<\/th>\n      <th>term<\/th>\n      <th>beta<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"scrollX":true,"scrollY":"400px","width":"80%","dom":"Bfrtip","buttons":["copy","csv","excel","pdf","print"],"columnDefs":[{"className":"dt-right","targets":[1,3]},{"name":"topic_label","targets":0},{"name":"topic","targets":1},{"name":"term","targets":2},{"name":"beta","targets":3}],"order":[],"autoWidth":false,"orderClasses":false,"rowCallback":"function(row, data, displayNum, displayIndex, dataIndex) {\nvar value=data[1]; $(this.api().cell(row, 1).node()).css({'font-size':'16px'});\nvar value=data[0]; $(this.api().cell(row, 0).node()).css({'font-size':'16px'});\nvar value=data[2]; $(this.api().cell(row, 2).node()).css({'font-size':'16px'});\nvar value=data[3]; $(this.api().cell(row, 3).node()).css({'font-size':'16px'});\n}"},"selection":{"mode":"multiple","selected":null,"target":"row","selectable":null}},"evals":["options.rowCallback"],"jsHooks":[]}</script>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># openxlsx::write.xlsx(top_labeled_topic_terms, "data/top_labeled_topic_terms.xlsx")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="probability-of-words-observed-in-each-topic-beta" class="level4">
+<h4 class="anchored" data-anchor-id="probability-of-words-observed-in-each-topic-beta">Probability of Words Observed in Each Topic (Beta)</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>word_probability_plot <span class="ot">&lt;-</span> <span class="fu">word_probability_plot</span>(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  top_labeled_topic_terms,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">topic_label =</span> <span class="st">"topic_label"</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">ncol =</span> <span class="dv">2</span>,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">height =</span> <span class="dv">1800</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">width =</span> <span class="dv">1500</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div id="htmlwidget-51014f4dc19e322585dd" style="width:100%;height:780px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-51014f4dc19e322585dd">{"x":{"data":[{"orientation":"h","width":[0.89999999999999858,0.89999999999999858,0.89999999999999947,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000013,0.89999999999999991],"base":[0,0,0,0,0,0,0,0,0,0],"x":[0.05416013087374804,0.036101620423598289,0.036100236166331311,0.03308403963288397,0.027078555085413493,0.027033627028382471,0.024025529096648259,0.021055384037020106,0.021037306966873563,0.018042203075319587],"y":[10,9,8,7,6,5,4,3,2,1],"text":["Topic: Artificial intelligence in education research and development <br>Beta: 0.054","Topic: Artificial intelligence in education research and development <br>Beta: 0.036","Topic: Artificial intelligence in education research and development <br>Beta: 0.036","Topic: Artificial intelligence in education research and development <br>Beta: 0.033","Topic: Artificial intelligence in education research and development <br>Beta: 0.027","Topic: Artificial intelligence in education research and development <br>Beta: 0.027","Topic: Artificial intelligence in education research and development <br>Beta: 0.024","Topic: Artificial intelligence in education research and development <br>Beta: 0.021","Topic: Artificial intelligence in education research and development <br>Beta: 0.021","Topic: Artificial intelligence in education research and development <br>Beta: 0.018"],"type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(248,118,109,0.9)","line":{"width":1.8897637795275593,"color":"transparent"}},"name":"Artificial intelligence in education research and development","legendgroup":"Artificial intelligence in education research and development","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"orientation":"h","width":[0.89999999999999858,0.89999999999999858,0.89999999999999947,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000013,0.89999999999999991,0.89999999999999858,0.89999999999999858,0.89999999999999947,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000013,0.89999999999999991],"base":[0,0,0,0,0,0,0,0,0,0,0.051500118414765574,0.042144103036698237,0.0282464176058131,0.023467884937052291,0.023377348994989576,0.023353699823392179,0.01872151438325978,0.014175717862348251,0.014119203789560887,0.014093875735185224],"x":[0.051500118414765574,0.042144103036698237,0.0282464176058131,0.023467884937052291,0.023377348994989576,0.023353699823392179,0.01872151438325978,0.014175717862348251,0.014119203789560887,0.014093875735185224,0.051500118412506367,0.042144103033835138,0.028246417603556135,0.023467884934605963,0.023377348993148063,0.023353699821298861,0.018721514381676671,0.014175717866953692,0.014119203787245736,0.01409387573284452],"y":[10,9,8,7,6,5,4,3,2,1,10,9,8,7,6,5,4,3,2,1],"text":["Topic: Student-centered AI policy for inclusive education <br>Beta: 0.052","Topic: Student-centered AI policy for inclusive education <br>Beta: 0.042","Topic: Student-centered AI policy for inclusive education <br>Beta: 0.028","Topic: Student-centered AI policy for inclusive education <br>Beta: 0.023","Topic: Student-centered AI policy for inclusive education <br>Beta: 0.023","Topic: Student-centered AI policy for inclusive education <br>Beta: 0.023","Topic: Student-centered AI policy for inclusive education <br>Beta: 0.019","Topic: Student-centered AI policy for inclusive education <br>Beta: 0.014","Topic: Student-centered AI policy for inclusive education <br>Beta: 0.014","Topic: Student-centered AI policy for inclusive education <br>Beta: 0.014","Topic: Student-centered AI policy for inclusive education <br>Beta: 0.052","Topic: Student-centered AI policy for inclusive education <br>Beta: 0.042","Topic: Student-centered AI policy for inclusive education <br>Beta: 0.028","Topic: Student-centered AI policy for inclusive education <br>Beta: 0.023","Topic: Student-centered AI policy for inclusive education <br>Beta: 0.023","Topic: Student-centered AI policy for inclusive education <br>Beta: 0.023","Topic: Student-centered AI policy for inclusive education <br>Beta: 0.019","Topic: Student-centered AI policy for inclusive education <br>Beta: 0.014","Topic: Student-centered AI policy for inclusive education <br>Beta: 0.014","Topic: Student-centered AI policy for inclusive education <br>Beta: 0.014"],"type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(225,138,0,0.9)","line":{"width":1.8897637795275593,"color":"transparent"}},"name":"Student-centered AI policy for inclusive education","legendgroup":"Student-centered AI policy for inclusive education","showlegend":true,"xaxis":"x2","yaxis":"y2","hoverinfo":"text","frame":null},{"orientation":"h","width":[0.89999999999999858,0.89999999999999858,0.89999999999999947,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000013,0.89999999999999991],"base":[0,0,0,0,0,0,0,0,0,0],"x":[0.062223517817010694,0.025746743151778297,0.025746624389649333,0.019314130803935368,0.017174344186474309,0.015031462733824802,0.015017889521126822,0.012882653067966267,0.012882439783182811,0.012875931604039456],"y":[10,9,8,7,6,5,4,3,2,1],"text":["Topic: Word recognition software for grade-level accommodations <br>Beta: 0.062","Topic: Word recognition software for grade-level accommodations <br>Beta: 0.026","Topic: Word recognition software for grade-level accommodations <br>Beta: 0.026","Topic: Word recognition software for grade-level accommodations <br>Beta: 0.019","Topic: Word recognition software for grade-level accommodations <br>Beta: 0.017","Topic: Word recognition software for grade-level accommodations <br>Beta: 0.015","Topic: Word recognition software for grade-level accommodations <br>Beta: 0.015","Topic: Word recognition software for grade-level accommodations <br>Beta: 0.013","Topic: Word recognition software for grade-level accommodations <br>Beta: 0.013","Topic: Word recognition software for grade-level accommodations <br>Beta: 0.013"],"type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(190,156,0,0.9)","line":{"width":1.8897637795275593,"color":"transparent"}},"name":"Word recognition software for grade-level accommodations","legendgroup":"Word recognition software for grade-level accommodations","showlegend":true,"xaxis":"x3","yaxis":"y3","hoverinfo":"text","frame":null},{"orientation":"h","width":[0.89999999999999858,0.89999999999999858,0.89999999999999947,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000013,0.89999999999999991],"base":[0,0,0,0,0,0,0,0,0,0],"x":[0.043109375034032019,0.027426703563082903,0.024806757903324254,0.01828097591113825,0.016975802897116355,0.015672420837650931,0.01436229280999639,0.014360936922598903,0.013061326880114202,0.013060618251746531],"y":[10,9,8,7,6,5,4,3,2,1],"text":["Topic: Defense initiative leveraging artificial intelligence for security. <br>Beta: 0.043","Topic: Defense initiative leveraging artificial intelligence for security. <br>Beta: 0.027","Topic: Defense initiative leveraging artificial intelligence for security. <br>Beta: 0.025","Topic: Defense initiative leveraging artificial intelligence for security. <br>Beta: 0.018","Topic: Defense initiative leveraging artificial intelligence for security. <br>Beta: 0.017","Topic: Defense initiative leveraging artificial intelligence for security. <br>Beta: 0.016","Topic: Defense initiative leveraging artificial intelligence for security. <br>Beta: 0.014","Topic: Defense initiative leveraging artificial intelligence for security. <br>Beta: 0.014","Topic: Defense initiative leveraging artificial intelligence for security. <br>Beta: 0.013","Topic: Defense initiative leveraging artificial intelligence for security. <br>Beta: 0.013"],"type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(140,171,0,0.9)","line":{"width":1.8897637795275593,"color":"transparent"}},"name":"Defense initiative leveraging artificial intelligence for security.","legendgroup":"Defense initiative leveraging artificial intelligence for security.","showlegend":true,"xaxis":"x4","yaxis":"y4","hoverinfo":"text","frame":null},{"orientation":"h","width":[0.89999999999999858,0.89999999999999858,0.89999999999999947,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000013,0.89999999999999991],"base":[0,0,0,0,0,0,0,0,0,0],"x":[0.042366764315786336,0.035300139111191647,0.032955227661440732,0.025878086601319142,0.023525506539221478,0.02117703501784152,0.014122404884416335,0.014121878979221602,0.011769469933270689,0.011764453131615451],"y":[10,9,8,7,6,5,4,3,2,1],"text":["Topic: Artificial intelligence in student academic integrity <br>Beta: 0.042","Topic: Artificial intelligence in student academic integrity <br>Beta: 0.035","Topic: Artificial intelligence in student academic integrity <br>Beta: 0.033","Topic: Artificial intelligence in student academic integrity <br>Beta: 0.026","Topic: Artificial intelligence in student academic integrity <br>Beta: 0.024","Topic: Artificial intelligence in student academic integrity <br>Beta: 0.021","Topic: Artificial intelligence in student academic integrity <br>Beta: 0.014","Topic: Artificial intelligence in student academic integrity <br>Beta: 0.014","Topic: Artificial intelligence in student academic integrity <br>Beta: 0.012","Topic: Artificial intelligence in student academic integrity <br>Beta: 0.012"],"type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(36,183,0,0.9)","line":{"width":1.8897637795275593,"color":"transparent"}},"name":"Artificial intelligence in student academic integrity","legendgroup":"Artificial intelligence in student academic integrity","showlegend":true,"xaxis":"x5","yaxis":"y5","hoverinfo":"text","frame":null},{"orientation":"h","width":[0.89999999999999858,0.89999999999999858,0.89999999999999947,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000013,0.89999999999999991],"base":[0,0,0,0,0,0,0,0,0,0],"x":[0.061477581542395229,0.039614979543874045,0.033838703570856915,0.020215753084473945,0.012790962093191799,0.010316153487611304,0.0099027946717632626,0.0094906702006251238,0.0094902559422206708,0.0082482002735441515],"y":[10,9,8,7,6,5,4,3,2,1],"text":["Topic: Artificial intelligence for inclusive user expertise <br>Beta: 0.061","Topic: Artificial intelligence for inclusive user expertise <br>Beta: 0.040","Topic: Artificial intelligence for inclusive user expertise <br>Beta: 0.034","Topic: Artificial intelligence for inclusive user expertise <br>Beta: 0.020","Topic: Artificial intelligence for inclusive user expertise <br>Beta: 0.013","Topic: Artificial intelligence for inclusive user expertise <br>Beta: 0.010","Topic: Artificial intelligence for inclusive user expertise <br>Beta: 0.010","Topic: Artificial intelligence for inclusive user expertise <br>Beta: 0.009","Topic: Artificial intelligence for inclusive user expertise <br>Beta: 0.009","Topic: Artificial intelligence for inclusive user expertise <br>Beta: 0.008"],"type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(0,190,112,0.9)","line":{"width":1.8897637795275593,"color":"transparent"}},"name":"Artificial intelligence for inclusive user expertise","legendgroup":"Artificial intelligence for inclusive user expertise","showlegend":true,"xaxis":"x6","yaxis":"y6","hoverinfo":"text","frame":null},{"orientation":"h","width":[0.89999999999999858,0.89999999999999858,0.89999999999999947,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000013,0.89999999999999991],"base":[0,0,0,0,0,0,0,0,0,0],"x":[0.066481981195888024,0.033885364435710628,0.018868467553166034,0.018015074475109177,0.016716486143435665,0.01544057307026047,0.013294244218642746,0.012436551043246447,0.011150011280151986,0.010722883463562762],"y":[10,9,8,7,6,5,4,3,2,1],"text":["Topic: Student-centered AI software for school investigations <br>Beta: 0.066","Topic: Student-centered AI software for school investigations <br>Beta: 0.034","Topic: Student-centered AI software for school investigations <br>Beta: 0.019","Topic: Student-centered AI software for school investigations <br>Beta: 0.018","Topic: Student-centered AI software for school investigations <br>Beta: 0.017","Topic: Student-centered AI software for school investigations <br>Beta: 0.015","Topic: Student-centered AI software for school investigations <br>Beta: 0.013","Topic: Student-centered AI software for school investigations <br>Beta: 0.012","Topic: Student-centered AI software for school investigations <br>Beta: 0.011","Topic: Student-centered AI software for school investigations <br>Beta: 0.011"],"type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(0,193,171,0.9)","line":{"width":1.8897637795275593,"color":"transparent"}},"name":"Student-centered AI software for school investigations","legendgroup":"Student-centered AI software for school investigations","showlegend":true,"xaxis":"x7","yaxis":"y7","hoverinfo":"text","frame":null},{"orientation":"h","width":[0.89999999999999858,0.89999999999999858,0.89999999999999947,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000013,0.89999999999999991],"base":[0,0,0,0,0,0,0,0,0,0],"x":[0.028412472496208697,0.025702912954685835,0.023000448417424813,0.018489347615328697,0.013529087568525706,0.011724514053741274,0.011273229996031647,0.01082294047087195,0.010372766433784849,0.0085686507313908044],"y":[10,9,8,7,6,5,4,3,2,1],"text":["Topic: Data utilization in ethical surveillance systems <br>Beta: 0.028","Topic: Data utilization in ethical surveillance systems <br>Beta: 0.026","Topic: Data utilization in ethical surveillance systems <br>Beta: 0.023","Topic: Data utilization in ethical surveillance systems <br>Beta: 0.018","Topic: Data utilization in ethical surveillance systems <br>Beta: 0.014","Topic: Data utilization in ethical surveillance systems <br>Beta: 0.012","Topic: Data utilization in ethical surveillance systems <br>Beta: 0.011","Topic: Data utilization in ethical surveillance systems <br>Beta: 0.011","Topic: Data utilization in ethical surveillance systems <br>Beta: 0.010","Topic: Data utilization in ethical surveillance systems <br>Beta: 0.009"],"type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(0,187,218,0.9)","line":{"width":1.8897637795275593,"color":"transparent"}},"name":"Data utilization in ethical surveillance systems","legendgroup":"Data utilization in ethical surveillance systems","showlegend":true,"xaxis":"x8","yaxis":"y8","hoverinfo":"text","frame":null},{"orientation":"h","width":[0.89999999999999858,0.89999999999999858,0.89999999999999947,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000013,0.89999999999999991],"base":[0,0,0,0,0,0,0,0,0,0],"x":[0.038104490595422161,0.017044498832465727,0.0160445566586076,0.015040144270003733,0.014538527302024118,0.01353356110449422,0.0115311207951113,0.011028464815324098,0.011028158967263144,0.011026419439944445],"y":[10,9,8,7,6,5,4,3,2,1],"text":["Topic: Artificial Intelligence Leadership in Organizational Settings <br>Beta: 0.038","Topic: Artificial Intelligence Leadership in Organizational Settings <br>Beta: 0.017","Topic: Artificial Intelligence Leadership in Organizational Settings <br>Beta: 0.016","Topic: Artificial Intelligence Leadership in Organizational Settings <br>Beta: 0.015","Topic: Artificial Intelligence Leadership in Organizational Settings <br>Beta: 0.015","Topic: Artificial Intelligence Leadership in Organizational Settings <br>Beta: 0.014","Topic: Artificial Intelligence Leadership in Organizational Settings <br>Beta: 0.012","Topic: Artificial Intelligence Leadership in Organizational Settings <br>Beta: 0.011","Topic: Artificial Intelligence Leadership in Organizational Settings <br>Beta: 0.011","Topic: Artificial Intelligence Leadership in Organizational Settings <br>Beta: 0.011"],"type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(0,172,252,0.9)","line":{"width":1.8897637795275593,"color":"transparent"}},"name":"Artificial Intelligence Leadership in Organizational Settings","legendgroup":"Artificial Intelligence Leadership in Organizational Settings","showlegend":true,"xaxis":"x9","yaxis":"y9","hoverinfo":"text","frame":null},{"orientation":"h","width":[0.89999999999999858,0.89999999999999858,0.89999999999999947,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000013,0.89999999999999991],"base":[0,0,0,0,0,0,0,0,0,0],"x":[0.049133684232970001,0.022775932030108349,0.016082620648192384,0.015184471604385845,0.01161565217127291,0.011614719607700847,0.010275226933040751,0.0098288599930627264,0.0098286363988144432,0.0098281888348997239],"y":[10,9,8,7,6,5,4,3,2,1],"text":["Topic: Artificial intelligence for student learning support <br>Beta: 0.049","Topic: Artificial intelligence for student learning support <br>Beta: 0.023","Topic: Artificial intelligence for student learning support <br>Beta: 0.016","Topic: Artificial intelligence for student learning support <br>Beta: 0.015","Topic: Artificial intelligence for student learning support <br>Beta: 0.012","Topic: Artificial intelligence for student learning support <br>Beta: 0.012","Topic: Artificial intelligence for student learning support <br>Beta: 0.010","Topic: Artificial intelligence for student learning support <br>Beta: 0.010","Topic: Artificial intelligence for student learning support <br>Beta: 0.010","Topic: Artificial intelligence for student learning support <br>Beta: 0.010"],"type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(139,147,255,0.9)","line":{"width":1.8897637795275593,"color":"transparent"}},"name":"Artificial intelligence for student learning support","legendgroup":"Artificial intelligence for student learning support","showlegend":true,"xaxis":"x10","yaxis":"y10","hoverinfo":"text","frame":null},{"orientation":"h","width":[0.89999999999999858,0.89999999999999858,0.89999999999999947,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000013,0.89999999999999991],"base":[0,0,0,0,0,0,0,0,0,0],"x":[0.039720521997775468,0.025631284932521568,0.012176957443468795,0.011533482912589576,0.010248679418720331,0.0089656547436171505,0.0083315826771221974,0.0083313414902054655,0.0076904671273922975,0.0076895658771051313],"y":[10,9,8,7,6,5,4,3,2,1],"text":["Topic: Artificial Intelligence in Risk Management Systems <br>Beta: 0.040","Topic: Artificial Intelligence in Risk Management Systems <br>Beta: 0.026","Topic: Artificial Intelligence in Risk Management Systems <br>Beta: 0.012","Topic: Artificial Intelligence in Risk Management Systems <br>Beta: 0.012","Topic: Artificial Intelligence in Risk Management Systems <br>Beta: 0.010","Topic: Artificial Intelligence in Risk Management Systems <br>Beta: 0.009","Topic: Artificial Intelligence in Risk Management Systems <br>Beta: 0.008","Topic: Artificial Intelligence in Risk Management Systems <br>Beta: 0.008","Topic: Artificial Intelligence in Risk Management Systems <br>Beta: 0.008","Topic: Artificial Intelligence in Risk Management Systems <br>Beta: 0.008"],"type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(213,117,254,0.9)","line":{"width":1.8897637795275593,"color":"transparent"}},"name":"Artificial Intelligence in Risk Management Systems","legendgroup":"Artificial Intelligence in Risk Management Systems","showlegend":true,"xaxis":"x11","yaxis":"y11","hoverinfo":"text","frame":null},{"orientation":"h","width":[0.89999999999999858,0.89999999999999858,0.89999999999999947,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000013,0.89999999999999991],"base":[0,0,0,0,0,0,0,0,0,0],"x":[0.045390208068462355,0.019167686965696519,0.015381214464919692,0.015377850705473267,0.013114586279295033,0.010330738412223331,0.0088259438532420388,0.0083228531232864833,0.0080701115439015605,0.0078183209407492998],"y":[10,9,8,7,6,5,4,3,2,1],"text":["Topic: Education-focused AI tools for student learning <br>Beta: 0.045","Topic: Education-focused AI tools for student learning <br>Beta: 0.019","Topic: Education-focused AI tools for student learning <br>Beta: 0.015","Topic: Education-focused AI tools for student learning <br>Beta: 0.015","Topic: Education-focused AI tools for student learning <br>Beta: 0.013","Topic: Education-focused AI tools for student learning <br>Beta: 0.010","Topic: Education-focused AI tools for student learning <br>Beta: 0.009","Topic: Education-focused AI tools for student learning <br>Beta: 0.008","Topic: Education-focused AI tools for student learning <br>Beta: 0.008","Topic: Education-focused AI tools for student learning <br>Beta: 0.008"],"type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(249,98,221,0.9)","line":{"width":1.8897637795275593,"color":"transparent"}},"name":"Education-focused AI tools for student learning","legendgroup":"Education-focused AI tools for student learning","showlegend":true,"xaxis":"x12","yaxis":"y12","hoverinfo":"text","frame":null},{"orientation":"h","width":[0.89999999999999858,0.89999999999999858,0.89999999999999947,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000036,0.90000000000000013,0.89999999999999991],"base":[0,0,0,0,0,0,0,0,0,0],"x":[0.30761566680534019,0.047650303960915304,0.044885571712573555,0.031830154050181664,0.031377566147812362,0.024181818230449514,0.022517965186201357,0.022053556984962041,0.019242283099080913,0.017932377979183296],"y":[10,9,8,7,6,5,4,3,2,1],"text":["Topic: Inclusive AI in Education Policy Implementation <br>Beta: 0.308","Topic: Inclusive AI in Education Policy Implementation <br>Beta: 0.048","Topic: Inclusive AI in Education Policy Implementation <br>Beta: 0.045","Topic: Inclusive AI in Education Policy Implementation <br>Beta: 0.032","Topic: Inclusive AI in Education Policy Implementation <br>Beta: 0.031","Topic: Inclusive AI in Education Policy Implementation <br>Beta: 0.024","Topic: Inclusive AI in Education Policy Implementation <br>Beta: 0.023","Topic: Inclusive AI in Education Policy Implementation <br>Beta: 0.022","Topic: Inclusive AI in Education Policy Implementation <br>Beta: 0.019","Topic: Inclusive AI in Education Policy Implementation <br>Beta: 0.018"],"type":"bar","textposition":"none","marker":{"autocolorscale":false,"color":"rgba(255,101,172,0.9)","line":{"width":1.8897637795275593,"color":"transparent"}},"name":"Inclusive AI in Education Policy Implementation","legendgroup":"Inclusive AI in Education Policy Implementation","showlegend":true,"xaxis":"x13","yaxis":"y13","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":40,"r":53.134080531340793,"b":40,"l":362.97218762972193},"font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"xaxis":{"domain":[0,0.36543873806558735],"automargin":true,"type":"linear","autorange":false,"range":[-0.0027080065436874022,0.05686813741743544],"tickmode":"array","ticktext":["0.000","0.020","0.040"],"tickvals":[0,0.02,0.040000000000000001],"categoryorder":"array","categoryarray":["0.000","0.020","0.040"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"y","title":"","hoverformat":".2f"},"annotations":[{"text":"Word probability","x":0.5,"y":0,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"top","annotationType":"axis","yshift":-51.473640514736388},{"text":"Artificial intelligence in education research and development","x":0.18271936903279368,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":14.611872146118724},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"Student-centered AI policy for inclusive education","x":0.81728063096720627,"y":1,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":14.611872146118724},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"Word recognition software for grade-level accommodations","x":0.18271936903279368,"y":0.82720025301943112,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":14.611872146118724},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"Defense initiative leveraging artificial intelligence for security.","x":0.81728063096720627,"y":0.82720025301943112,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":14.611872146118724},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"Artificial intelligence in student academic integrity","x":0.18271936903279368,"y":0.68434311016228822,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":14.611872146118724},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"Artificial intelligence for inclusive user expertise","x":0.81728063096720627,"y":0.68434311016228822,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":14.611872146118724},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"Student-centered AI software for school investigations","x":0.18271936903279368,"y":0.54148596730514531,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":14.611872146118724},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"Data utilization in ethical surveillance systems","x":0.81728063096720627,"y":0.54148596730514531,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":14.611872146118724},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"Artificial Intelligence Leadership in Organizational Settings","x":0.18271936903279368,"y":0.39862882444800257,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":14.611872146118724},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"Artificial intelligence for student learning support","x":0.81728063096720627,"y":0.39862882444800257,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":14.611872146118724},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"Artificial Intelligence in Risk Management Systems","x":0.18271936903279368,"y":0.25577168159085978,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":14.611872146118724},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"Education-focused AI tools for student learning","x":0.81728063096720627,"y":0.25577168159085978,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":14.611872146118724},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"},{"text":"Inclusive AI in Education Policy Implementation","x":0.18271936903279368,"y":0.11291453873371686,"showarrow":false,"ax":0,"ay":0,"font":{"color":"rgba(26,26,26,1)","family":"","size":14.611872146118724},"xref":"paper","yref":"paper","textangle":-0,"xanchor":"center","yanchor":"bottom"}],"yaxis":{"domain":[0.88708546126628329,1],"automargin":true,"type":"linear","autorange":false,"range":[0.40000000000000002,10.6],"tickmode":"array","ticktext":["development","science","program","artificial_intelligence_systems","field","include","research","artificial_intelligence","relate","education"],"tickvals":[1,2,3,4,5,6.0000000000000009,7,8,9,10],"categoryorder":"array","categoryarray":["development","science","program","artificial_intelligence_systems","field","include","research","artificial_intelligence","relate","education"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"x","title":"","hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":0.36543873806558735,"y0":0.88708546126628329,"y1":1},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":0.36543873806558735,"y0":0,"y1":14.611872146118724,"yanchor":1,"ysizemode":"pixel"},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0.63456126193441265,"x1":1,"y0":0.88708546126628329,"y1":1},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0.63456126193441265,"x1":1,"y0":0,"y1":14.611872146118724,"yanchor":1,"ysizemode":"pixel"},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":0.36543873806558735,"y0":0.74422831840914039,"y1":0.82720025301943112},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":0.36543873806558735,"y0":0,"y1":14.611872146118724,"yanchor":0.82720025301943112,"ysizemode":"pixel"},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0.63456126193441265,"x1":1,"y0":0.74422831840914039,"y1":0.82720025301943112},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0.63456126193441265,"x1":1,"y0":0,"y1":14.611872146118724,"yanchor":0.82720025301943112,"ysizemode":"pixel"},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":0.36543873806558735,"y0":0.60137117555199748,"y1":0.68434311016228822},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":0.36543873806558735,"y0":0,"y1":14.611872146118724,"yanchor":0.68434311016228822,"ysizemode":"pixel"},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0.63456126193441265,"x1":1,"y0":0.60137117555199748,"y1":0.68434311016228822},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0.63456126193441265,"x1":1,"y0":0,"y1":14.611872146118724,"yanchor":0.68434311016228822,"ysizemode":"pixel"},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":0.36543873806558735,"y0":0.45851403269485463,"y1":0.54148596730514531},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":0.36543873806558735,"y0":0,"y1":14.611872146118724,"yanchor":0.54148596730514531,"ysizemode":"pixel"},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0.63456126193441265,"x1":1,"y0":0.45851403269485463,"y1":0.54148596730514531},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0.63456126193441265,"x1":1,"y0":0,"y1":14.611872146118724,"yanchor":0.54148596730514531,"ysizemode":"pixel"},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":0.36543873806558735,"y0":0.31565688983771184,"y1":0.39862882444800257},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":0.36543873806558735,"y0":0,"y1":14.611872146118724,"yanchor":0.39862882444800257,"ysizemode":"pixel"},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0.63456126193441265,"x1":1,"y0":0.31565688983771184,"y1":0.39862882444800257},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0.63456126193441265,"x1":1,"y0":0,"y1":14.611872146118724,"yanchor":0.39862882444800257,"ysizemode":"pixel"},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":0.36543873806558735,"y0":0.17279974698056894,"y1":0.25577168159085978},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":0.36543873806558735,"y0":0,"y1":14.611872146118724,"yanchor":0.25577168159085978,"ysizemode":"pixel"},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0.63456126193441265,"x1":1,"y0":0.17279974698056894,"y1":0.25577168159085978},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0.63456126193441265,"x1":1,"y0":0,"y1":14.611872146118724,"yanchor":0.25577168159085978,"ysizemode":"pixel"},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":0.36543873806558735,"y0":0,"y1":0.11291453873371686},{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":0.36543873806558735,"y0":0,"y1":14.611872146118724,"yanchor":0.11291453873371686,"ysizemode":"pixel"}],"xaxis2":{"type":"linear","autorange":false,"range":[-0.0051500118413635972,0.10815024866863554],"tickmode":"array","ticktext":["0.000","0.025","0.050","0.075","0.100"],"tickvals":[0,0.025000000000000005,0.050000000000000003,0.075000000000000011,0.10000000000000001],"categoryorder":"array","categoryarray":["0.000","0.025","0.050","0.075","0.100"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"domain":[0.63456126193441265,1],"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"y2","title":"","hoverformat":".2f"},"yaxis2":{"type":"linear","autorange":false,"range":[0.40000000000000002,10.6],"tickmode":"array","ticktext":["activity","monitor","online","school","education","technology","policy","disability","student","ai"],"tickvals":[1,2,3,4,5,6.0000000000000009,7,8,9,10],"categoryorder":"array","categoryarray":["activity","monitor","online","school","education","technology","policy","disability","student","ai"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"domain":[0.88708546126628329,1],"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"x2","title":"","hoverformat":".2f"},"xaxis3":{"type":"linear","autorange":false,"range":[-0.0031111758908505347,0.065334693707861227],"tickmode":"array","ticktext":["0.000","0.020","0.040","0.060"],"tickvals":[-4.3368086899420177e-19,0.020000000000000004,0.040000000000000001,0.060000000000000005],"categoryorder":"array","categoryarray":["0.000","0.020","0.040","0.060"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"domain":[0,0.36543873806558735],"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"y3","title":"","hoverformat":".2f"},"yaxis3":{"type":"linear","autorange":false,"range":[0.40000000000000002,10.6],"tickmode":"array","ticktext":["grade","accommodation","write","use","software","word","read","i","d","w.a"],"tickvals":[1,2,3,4,5,6.0000000000000009,7,8,9,10],"categoryorder":"array","categoryarray":["grade","accommodation","write","use","software","word","read","i","d","w.a"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"domain":[0.74422831840914039,0.82720025301943112],"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"x3","title":"","hoverformat":".2f"},"xaxis4":{"type":"linear","autorange":false,"range":[-0.0021554687517016009,0.045264843785733616],"tickmode":"array","ticktext":["0.000","0.010","0.020","0.030","0.040"],"tickvals":[0,0.01,0.02,0.029999999999999995,0.040000000000000008],"categoryorder":"array","categoryarray":["0.000","0.010","0.020","0.030","0.040"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"domain":[0.63456126193441265,1],"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"y4","title":"","hoverformat":".2f"},"yaxis4":{"type":"linear","autorange":false,"range":[0.40000000000000002,10.6],"tickmode":"array","ticktext":["act","report","paragraph","sec","section","initiative","shall","defense","center","artificial_intelligence"],"tickvals":[1,2,3,4,5,6.0000000000000009,7,8,9,10],"categoryorder":"array","categoryarray":["act","report","paragraph","sec","section","initiative","shall","defense","center","artificial_intelligence"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"domain":[0.74422831840914039,0.82720025301943112],"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"x4","title":"","hoverformat":".2f"},"xaxis5":{"type":"linear","autorange":false,"range":[-0.002118338215789317,0.04448510253157565],"tickmode":"array","ticktext":["0.000","0.010","0.020","0.030","0.040"],"tickvals":[0,0.0099999999999999985,0.02,0.029999999999999995,0.040000000000000001],"categoryorder":"array","categoryarray":["0.000","0.010","0.020","0.030","0.040"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"domain":[0,0.36543873806558735],"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"y5","title":"","hoverformat":".2f"},"yaxis5":{"type":"linear","autorange":false,"range":[0.40000000000000002,10.6],"tickmode":"array","ticktext":["cheat","work","school","artificial_intelligence","document","d","i","use","ai","student"],"tickvals":[1,2,3,4,5,6.0000000000000009,7,8,9,10],"categoryorder":"array","categoryarray":["cheat","work","school","artificial_intelligence","document","d","i","use","ai","student"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"domain":[0.60137117555199748,0.68434311016228822],"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"x5","title":"","hoverformat":".2f"},"xaxis6":{"type":"linear","autorange":false,"range":[-0.0030738790771197618,0.064551460619514986],"tickmode":"array","ticktext":["0.000","0.020","0.040","0.060"],"tickvals":[-4.3368086899420177e-19,0.019999999999999997,0.040000000000000001,0.059999999999999991],"categoryorder":"array","categoryarray":["0.000","0.020","0.040","0.060"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"domain":[0.63456126193441265,1],"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"y6","title":"","hoverformat":".2f"},"yaxis6":{"type":"linear","autorange":false,"range":[0.40000000000000002,10.6],"tickmode":"array","ticktext":["technology","bias","image","expert","user","system","use","people","disability","ai"],"tickvals":[1,2,3,4,5,6.0000000000000009,7,8,9,10],"categoryorder":"array","categoryarray":["technology","bias","image","expert","user","system","use","people","disability","ai"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"domain":[0.60137117555199748,0.68434311016228822],"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"x6","title":"","hoverformat":".2f"},"xaxis7":{"type":"linear","autorange":false,"range":[-0.0033240990597944013,0.069806080255682426],"tickmode":"array","ticktext":["0.000","0.020","0.040","0.060"],"tickvals":[0,0.019999999999999997,0.040000000000000001,0.059999999999999998],"categoryorder":"array","categoryarray":["0.000","0.020","0.040","0.060"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"domain":[0,0.36543873806558735],"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"y7","title":"","hoverformat":".2f"},"yaxis7":{"type":"linear","autorange":false,"range":[0.40000000000000002,10.6],"tickmode":"array","ticktext":["example","investigation","complaint","ocr","software","ai","base","use","school","student"],"tickvals":[1,2,3,4,5,6.0000000000000009,7,8,9,10],"categoryorder":"array","categoryarray":["example","investigation","complaint","ocr","software","ai","base","use","school","student"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"domain":[0.45851403269485463,0.54148596730514531],"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"x7","title":"","hoverformat":".2f"},"xaxis8":{"type":"linear","autorange":false,"range":[-0.0014206236248104349,0.029833096121019132],"tickmode":"array","ticktext":["0.000","0.010","0.020"],"tickvals":[0,0.01,0.02],"categoryorder":"array","categoryarray":["0.000","0.010","0.020"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"domain":[0.63456126193441265,1],"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"y8","title":"","hoverformat":".2f"},"yaxis8":{"type":"linear","autorange":false,"range":[0.40000000000000002,10.6],"tickmode":"array","ticktext":["individual","right","surveillance","relate","domain","sensitive","include","system","use","datum"],"tickvals":[1,2,3,4,5,6.0000000000000009,7,8,9,10],"categoryorder":"array","categoryarray":["individual","right","surveillance","relate","domain","sensitive","include","system","use","datum"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"domain":[0.45851403269485463,0.54148596730514531],"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"x8","title":"","hoverformat":".2f"},"xaxis9":{"type":"linear","autorange":false,"range":[-0.0019052245297711081,0.040009715125193267],"tickmode":"array","ticktext":["0.000","0.010","0.020","0.030","0.040"],"tickvals":[0,0.01,0.02,0.029999999999999995,0.040000000000000001],"categoryorder":"array","categoryarray":["0.000","0.010","0.020","0.030","0.040"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"domain":[0,0.36543873806558735],"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"y9","title":"","hoverformat":".2f"},"yaxis9":{"type":"linear","autorange":false,"range":[0.40000000000000002,10.6],"tickmode":"array","ticktext":["include","subsection","director","support","artificial_intelligence_systems","secretary","institute","term","shall","artificial_intelligence"],"tickvals":[1,2,3,4,5,6.0000000000000009,7,8,9,10],"categoryorder":"array","categoryarray":["include","subsection","director","support","artificial_intelligence_systems","secretary","institute","term","shall","artificial_intelligence"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"domain":[0.31565688983771184,0.39862882444800257],"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"x9","title":"","hoverformat":".2f"},"xaxis10":{"type":"linear","autorange":false,"range":[-0.0024566842116485002,0.051590368444618499],"tickmode":"array","ticktext":["0.000","0.010","0.020","0.030","0.040","0.050"],"tickvals":[0,0.01,0.02,0.029999999999999995,0.040000000000000001,0.050000000000000003],"categoryorder":"array","categoryarray":["0.000","0.010","0.020","0.030","0.040","0.050"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"domain":[0.63456126193441265,1],"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"y10","title":"","hoverformat":".2f"},"yaxis10":{"type":"linear","autorange":false,"range":[0.40000000000000002,10.6],"tickmode":"array","ticktext":["teacher","must","need","human","model","learn","use","system","student","ai"],"tickvals":[1,2,3,4,5,6.0000000000000009,7,8,9,10],"categoryorder":"array","categoryarray":["teacher","must","need","human","model","learn","use","system","student","ai"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"domain":[0.31565688983771184,0.39862882444800257],"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"x10","title":"","hoverformat":".2f"},"xaxis11":{"type":"linear","autorange":false,"range":[-0.0019860260998887736,0.041706548097664241],"tickmode":"array","ticktext":["0.000","0.010","0.020","0.030","0.040"],"tickvals":[0,0.010000000000000002,0.02,0.029999999999999999,0.040000000000000001],"categoryorder":"array","categoryarray":["0.000","0.010","0.020","0.030","0.040"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"domain":[0,0.36543873806558735],"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"y11","title":"","hoverformat":".2f"},"yaxis11":{"type":"linear","autorange":false,"range":[0.40000000000000002,10.6],"tickmode":"array","ticktext":["term","federal_government","mean","law","technology","include","system","risk","use","ai"],"tickvals":[1,2,3,4,5,6.0000000000000009,7,8,9,10],"categoryorder":"array","categoryarray":["term","federal_government","mean","law","technology","include","system","risk","use","ai"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"domain":[0.17279974698056894,0.25577168159085978],"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"x11","title":"","hoverformat":".2f"},"xaxis12":{"type":"linear","autorange":false,"range":[-0.002269510403423118,0.047659718471885472],"tickmode":"array","ticktext":["0.000","0.010","0.020","0.030","0.040"],"tickvals":[0,0.01,0.02,0.029999999999999999,0.040000000000000001],"categoryorder":"array","categoryarray":["0.000","0.010","0.020","0.030","0.040"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"domain":[0.63456126193441265,1],"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"y12","title":"","hoverformat":".2f"},"yaxis12":{"type":"linear","autorange":false,"range":[0.40000000000000002,10.6],"tickmode":"array","ticktext":["educator","resource","product","learn","education","risk","student","use","developer","ai"],"tickvals":[1,2,3,4,5,6.0000000000000009,7,8,9,10],"categoryorder":"array","categoryarray":["educator","resource","product","learn","education","risk","student","use","developer","ai"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"domain":[0.17279974698056894,0.25577168159085978],"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"x12","title":"","hoverformat":".2f"},"xaxis13":{"type":"linear","autorange":false,"range":[-0.015380783340267011,0.32299645014560718],"tickmode":"array","ticktext":["0.000","0.100","0.200","0.300"],"tickvals":[0,0.10000000000000001,0.20000000000000001,0.30000000000000004],"categoryorder":"array","categoryarray":["0.000","0.100","0.200","0.300"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"domain":[0,0.36543873806558735],"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"y13","title":"","hoverformat":".2f"},"yaxis13":{"type":"linear","autorange":false,"range":[0.40000000000000002,10.6],"tickmode":"array","ticktext":["take","disability","school","use","policy","technology","education","student","ai","enormous"],"tickvals":[1,2,3,4,5,6.0000000000000009,7,8,9,10],"categoryorder":"array","categoryarray":["take","disability","school","use","policy","technology","education","student","ai","enormous"],"nticks":null,"ticks":"outside","tickcolor":"rgba(59,59,59,1)","ticklen":3.6529680365296811,"tickwidth":0.39850560398505613,"showticklabels":true,"tickfont":{"color":"rgba(59,59,59,1)","family":"","size":14.611872146118724},"tickangle":-0,"showline":true,"linecolor":"rgba(59,59,59,1)","linewidth":0.39850560398505613,"showgrid":false,"domain":[0,0.11291453873371686],"gridcolor":null,"gridwidth":0,"zeroline":false,"anchor":"x13","title":"","hoverformat":".2f"},"showlegend":false,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498}},"hovermode":"closest","width":1500,"height":1800,"barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"5fbc707f3058":{"x":{},"y":{},"fill":{},"text":{},"type":"bar"}},"cur_data":"5fbc707f3058","visdat":{"5fbc707f3058":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<!-- -->
+
+</section>
+</section>
 
 </main>
 <!-- /main column -->
@@ -160,6 +505,57 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       container: window.document.getElementById('quarto-embedded-source-code-modal')
     });
     clipboardModal.on('success', onCopySuccess);
+  }
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
   }
     var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
     var mailtoRegex = new RegExp(/^mailto:/);
@@ -490,7 +886,284 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
   }
 });
-</script>
+</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb16" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Addressing the void of AI policies in education for individuals with learning disabilities"</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "`r Sys.Date()`"</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="co">    fontawesome: true</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>The website contains supplemental materials and code used to analyze text data in Authors (2025).</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="in">```{r setup, include=FALSE}</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="in">knitr::opts_chunk$set(echo = TRUE, warning = FALSE)</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="fu">## Set Up</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Load R Packages</span></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>({</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(tidyr)</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(dplyr)</span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(readxl)</span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(brms)</span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(gtsummary)</span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(officer)</span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(flextable)</span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(ggplot2)</span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(quanteda)</span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(stopwords)</span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(TextAnalysisR)</span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(spacyr)</span>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a>    <span class="fu">library</span>(htmlwidgets)</span>
+<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-42"><a href="#cb16-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-43"><a href="#cb16-43" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Load Dataset</span></span>
+<span id="cb16-44"><a href="#cb16-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-47"><a href="#cb16-47" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb16-48"><a href="#cb16-48" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
+<span id="cb16-49"><a href="#cb16-49" aria-hidden="true" tabindex="-1"></a><span class="co"># data &lt;- read_excel("data/PolicyData.xlsx")</span></span>
+<span id="cb16-50"><a href="#cb16-50" aria-hidden="true" tabindex="-1"></a><span class="fu">load</span>(<span class="st">"data/ai_ld_data.rda"</span>)</span>
+<span id="cb16-51"><a href="#cb16-51" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-52"><a href="#cb16-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-53"><a href="#cb16-53" aria-hidden="true" tabindex="-1"></a><span class="fu">## Preporcess Text Data</span></span>
+<span id="cb16-54"><a href="#cb16-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-55"><a href="#cb16-55" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Unite Text Columns</span></span>
+<span id="cb16-56"><a href="#cb16-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-57"><a href="#cb16-57" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, eval=FALSE}</span></span>
+<span id="cb16-58"><a href="#cb16-58" aria-hidden="true" tabindex="-1"></a><span class="in">#| code-fold: false</span></span>
+<span id="cb16-59"><a href="#cb16-59" aria-hidden="true" tabindex="-1"></a><span class="in">united_tbl &lt;- unite_text_cols(data, </span></span>
+<span id="cb16-60"><a href="#cb16-60" aria-hidden="true" tabindex="-1"></a><span class="in">                              listed_vars = paste0("Text", 1:22))</span></span>
+<span id="cb16-61"><a href="#cb16-61" aria-hidden="true" tabindex="-1"></a><span class="in">                              </span></span>
+<span id="cb16-62"><a href="#cb16-62" aria-hidden="true" tabindex="-1"></a><span class="in">united_tbl &lt;- united_tbl %&gt;% </span></span>
+<span id="cb16-63"><a href="#cb16-63" aria-hidden="true" tabindex="-1"></a><span class="in">   dplyr::select(-all_of(paste0("Text", 1:22)))</span></span>
+<span id="cb16-64"><a href="#cb16-64" aria-hidden="true" tabindex="-1"></a><span class="in">                              </span></span>
+<span id="cb16-65"><a href="#cb16-65" aria-hidden="true" tabindex="-1"></a><span class="in">openxlsx::write.xlsx(united_tbl, "data/united_tbl.xlsx")                             </span></span>
+<span id="cb16-66"><a href="#cb16-66" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-67"><a href="#cb16-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-68"><a href="#cb16-68" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Segment a Corpus Into Tokens</span></span>
+<span id="cb16-69"><a href="#cb16-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-70"><a href="#cb16-70" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, eval=FALSE}</span></span>
+<span id="cb16-71"><a href="#cb16-71" aria-hidden="true" tabindex="-1"></a><span class="in">#| code-fold: false</span></span>
+<span id="cb16-72"><a href="#cb16-72" aria-hidden="true" tabindex="-1"></a><span class="in">tokens &lt;- preprocess_texts(united_tbl, text_field = "united_texts", verbose = FALSE)</span></span>
+<span id="cb16-73"><a href="#cb16-73" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-74"><a href="#cb16-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-75"><a href="#cb16-75" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Detect Multi-Word Expressions</span></span>
+<span id="cb16-76"><a href="#cb16-76" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-77"><a href="#cb16-77" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, eval=FALSE}</span></span>
+<span id="cb16-78"><a href="#cb16-78" aria-hidden="true" tabindex="-1"></a><span class="in">#| code-fold: false</span></span>
+<span id="cb16-79"><a href="#cb16-79" aria-hidden="true" tabindex="-1"></a><span class="in">tokens_collocations &lt;- detect_multi_word_expressions(tokens, size = 2:5, min_count = 2)</span></span>
+<span id="cb16-80"><a href="#cb16-80" aria-hidden="true" tabindex="-1"></a><span class="in">tokens_dict &lt;- quanteda::dictionary(</span></span>
+<span id="cb16-81"><a href="#cb16-81" aria-hidden="true" tabindex="-1"></a><span class="in">list(custom = </span></span>
+<span id="cb16-82"><a href="#cb16-82" aria-hidden="true" tabindex="-1"></a><span class="in">c("intelligence systems", </span></span>
+<span id="cb16-83"><a href="#cb16-83" aria-hidden="true" tabindex="-1"></a><span class="in">"artificial intelligence", </span></span>
+<span id="cb16-84"><a href="#cb16-84" aria-hidden="true" tabindex="-1"></a><span class="in">"civil rights",</span></span>
+<span id="cb16-85"><a href="#cb16-85" aria-hidden="true" tabindex="-1"></a><span class="in">"federal government",</span></span>
+<span id="cb16-86"><a href="#cb16-86" aria-hidden="true" tabindex="-1"></a><span class="in">"automated systems",</span></span>
+<span id="cb16-87"><a href="#cb16-87" aria-hidden="true" tabindex="-1"></a><span class="in">"decision making")))</span></span>
+<span id="cb16-88"><a href="#cb16-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-89"><a href="#cb16-89" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-90"><a href="#cb16-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-91"><a href="#cb16-91" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Process Tokens With Compound Words</span></span>
+<span id="cb16-92"><a href="#cb16-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-93"><a href="#cb16-93" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, eval=FALSE}</span></span>
+<span id="cb16-94"><a href="#cb16-94" aria-hidden="true" tabindex="-1"></a><span class="in">#| code-fold: false</span></span>
+<span id="cb16-95"><a href="#cb16-95" aria-hidden="true" tabindex="-1"></a><span class="in">compound_tokens &lt;- function(tokens, dict) {</span></span>
+<span id="cb16-96"><a href="#cb16-96" aria-hidden="true" tabindex="-1"></a><span class="in">  quanteda::tokens_compound(</span></span>
+<span id="cb16-97"><a href="#cb16-97" aria-hidden="true" tabindex="-1"></a><span class="in">    tokens,</span></span>
+<span id="cb16-98"><a href="#cb16-98" aria-hidden="true" tabindex="-1"></a><span class="in">    pattern = dict,</span></span>
+<span id="cb16-99"><a href="#cb16-99" aria-hidden="true" tabindex="-1"></a><span class="in">    concatenator = "_",</span></span>
+<span id="cb16-100"><a href="#cb16-100" aria-hidden="true" tabindex="-1"></a><span class="in">    valuetype = "glob",</span></span>
+<span id="cb16-101"><a href="#cb16-101" aria-hidden="true" tabindex="-1"></a><span class="in">    window = 0,</span></span>
+<span id="cb16-102"><a href="#cb16-102" aria-hidden="true" tabindex="-1"></a><span class="in">    case_insensitive = TRUE,</span></span>
+<span id="cb16-103"><a href="#cb16-103" aria-hidden="true" tabindex="-1"></a><span class="in">    join = TRUE,</span></span>
+<span id="cb16-104"><a href="#cb16-104" aria-hidden="true" tabindex="-1"></a><span class="in">    keep_unigrams = FALSE,</span></span>
+<span id="cb16-105"><a href="#cb16-105" aria-hidden="true" tabindex="-1"></a><span class="in">    verbose = TRUE</span></span>
+<span id="cb16-106"><a href="#cb16-106" aria-hidden="true" tabindex="-1"></a><span class="in">  )</span></span>
+<span id="cb16-107"><a href="#cb16-107" aria-hidden="true" tabindex="-1"></a><span class="in">}</span></span>
+<span id="cb16-108"><a href="#cb16-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-109"><a href="#cb16-109" aria-hidden="true" tabindex="-1"></a><span class="in">tokens_compound &lt;- compound_tokens(tokens, tokens_dict)</span></span>
+<span id="cb16-110"><a href="#cb16-110" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-111"><a href="#cb16-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-112"><a href="#cb16-112" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Word Frequency</span></span>
+<span id="cb16-113"><a href="#cb16-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-114"><a href="#cb16-114" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, eval=FALSE}</span></span>
+<span id="cb16-115"><a href="#cb16-115" aria-hidden="true" tabindex="-1"></a><span class="in">#| code-fold: false</span></span>
+<span id="cb16-116"><a href="#cb16-116" aria-hidden="true" tabindex="-1"></a><span class="in">dfm_object &lt;- dfm(tokens_compound)</span></span>
+<span id="cb16-117"><a href="#cb16-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-118"><a href="#cb16-118" aria-hidden="true" tabindex="-1"></a><span class="in">word_frequency_plot &lt;- plot_word_frequency(dfm_object, n = 20)</span></span>
+<span id="cb16-119"><a href="#cb16-119" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-120"><a href="#cb16-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-121"><a href="#cb16-121" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Remove Predefined Stopwords</span></span>
+<span id="cb16-122"><a href="#cb16-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-123"><a href="#cb16-123" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, eval=FALSE}</span></span>
+<span id="cb16-124"><a href="#cb16-124" aria-hidden="true" tabindex="-1"></a><span class="in">#| code-fold: false</span></span>
+<span id="cb16-125"><a href="#cb16-125" aria-hidden="true" tabindex="-1"></a><span class="in">stopwords &lt;- stopwords("en", source = "snowball")</span></span>
+<span id="cb16-126"><a href="#cb16-126" aria-hidden="true" tabindex="-1"></a><span class="in">toks_removed &lt;- tokens_remove(tokens_compound, pattern = stopwords, verbose = FALSE)</span></span>
+<span id="cb16-127"><a href="#cb16-127" aria-hidden="true" tabindex="-1"></a><span class="in">dfm_init &lt;- dfm(toks_removed)</span></span>
+<span id="cb16-128"><a href="#cb16-128" aria-hidden="true" tabindex="-1"></a><span class="in">plot_word_frequency(dfm_init, n = 40)</span></span>
+<span id="cb16-129"><a href="#cb16-129" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-130"><a href="#cb16-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-131"><a href="#cb16-131" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Remove Common Words in the Dataset</span></span>
+<span id="cb16-132"><a href="#cb16-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-133"><a href="#cb16-133" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, eval=FALSE}</span></span>
+<span id="cb16-134"><a href="#cb16-134" aria-hidden="true" tabindex="-1"></a><span class="in">#| code-fold: false</span></span>
+<span id="cb16-135"><a href="#cb16-135" aria-hidden="true" tabindex="-1"></a><span class="in">common_words &lt;- c("na", "may", "can", "['’]s")</span></span>
+<span id="cb16-136"><a href="#cb16-136" aria-hidden="true" tabindex="-1"></a><span class="in">toks_removed_common &lt;- tokens_remove(toks_removed, </span></span>
+<span id="cb16-137"><a href="#cb16-137" aria-hidden="true" tabindex="-1"></a><span class="in">                                     pattern = common_words, </span></span>
+<span id="cb16-138"><a href="#cb16-138" aria-hidden="true" tabindex="-1"></a><span class="in">                                     valuetype = "regex", </span></span>
+<span id="cb16-139"><a href="#cb16-139" aria-hidden="true" tabindex="-1"></a><span class="in">                                     verbose = FALSE)</span></span>
+<span id="cb16-140"><a href="#cb16-140" aria-hidden="true" tabindex="-1"></a><span class="in">dfm_removed &lt;- dfm(toks_removed_common)</span></span>
+<span id="cb16-141"><a href="#cb16-141" aria-hidden="true" tabindex="-1"></a><span class="in">plot_word_frequency(dfm_removed, n = 20)</span></span>
+<span id="cb16-142"><a href="#cb16-142" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-143"><a href="#cb16-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-144"><a href="#cb16-144" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Lemmatize Tokens</span></span>
+<span id="cb16-145"><a href="#cb16-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-146"><a href="#cb16-146" aria-hidden="true" tabindex="-1"></a><span class="fu">##### Word frequency  </span></span>
+<span id="cb16-147"><a href="#cb16-147" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-148"><a href="#cb16-148" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, eval=FALSE}</span></span>
+<span id="cb16-149"><a href="#cb16-149" aria-hidden="true" tabindex="-1"></a><span class="in">#| code-fold: false</span></span>
+<span id="cb16-150"><a href="#cb16-150" aria-hidden="true" tabindex="-1"></a><span class="in">texts &lt;- sapply(toks_removed_common, paste, collapse = " ")</span></span>
+<span id="cb16-151"><a href="#cb16-151" aria-hidden="true" tabindex="-1"></a><span class="in">parsed &lt;- spacy_parse(x = texts, lemma = TRUE, entity = FALSE, pos = FALSE)</span></span>
+<span id="cb16-152"><a href="#cb16-152" aria-hidden="true" tabindex="-1"></a><span class="in">toks_lemmatized &lt;- as.tokens(parsed, use_lemma = TRUE)</span></span>
+<span id="cb16-153"><a href="#cb16-153" aria-hidden="true" tabindex="-1"></a><span class="in">dfm &lt;- dfm(toks_lemmatized)</span></span>
+<span id="cb16-154"><a href="#cb16-154" aria-hidden="true" tabindex="-1"></a><span class="in">dfm_freq &lt;- plot_word_frequency(dfm, n = 20)</span></span>
+<span id="cb16-155"><a href="#cb16-155" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-156"><a href="#cb16-156" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-157"><a href="#cb16-157" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, echo=FALSE}</span></span>
+<span id="cb16-158"><a href="#cb16-158" aria-hidden="true" tabindex="-1"></a><span class="in">dfm_freq</span></span>
+<span id="cb16-159"><a href="#cb16-159" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-160"><a href="#cb16-160" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-161"><a href="#cb16-161" aria-hidden="true" tabindex="-1"></a><span class="fu">## Optimal Topic Numbers </span></span>
+<span id="cb16-162"><a href="#cb16-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-163"><a href="#cb16-163" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Model Diagnostics </span></span>
+<span id="cb16-164"><a href="#cb16-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-165"><a href="#cb16-165" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, eval = FALSE}</span></span>
+<span id="cb16-166"><a href="#cb16-166" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-167"><a href="#cb16-167" aria-hidden="true" tabindex="-1"></a><span class="in">dfm@docvars$Disability &lt;- as.factor(data$Disability)</span></span>
+<span id="cb16-168"><a href="#cb16-168" aria-hidden="true" tabindex="-1"></a><span class="in">dfm@docvars$LD &lt;- as.factor(data$LD)</span></span>
+<span id="cb16-169"><a href="#cb16-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-170"><a href="#cb16-170" aria-hidden="true" tabindex="-1"></a><span class="in">evaluate_optimal_topic_number(</span></span>
+<span id="cb16-171"><a href="#cb16-171" aria-hidden="true" tabindex="-1"></a><span class="in">  dfm_object = dfm,</span></span>
+<span id="cb16-172"><a href="#cb16-172" aria-hidden="true" tabindex="-1"></a><span class="in">  topic_range = 5:30,</span></span>
+<span id="cb16-173"><a href="#cb16-173" aria-hidden="true" tabindex="-1"></a><span class="in">  max.em.its = 75,</span></span>
+<span id="cb16-174"><a href="#cb16-174" aria-hidden="true" tabindex="-1"></a><span class="in">  categorical_var = c("Disability", "LD"),</span></span>
+<span id="cb16-175"><a href="#cb16-175" aria-hidden="true" tabindex="-1"></a><span class="in">  continuous_var = "",</span></span>
+<span id="cb16-176"><a href="#cb16-176" aria-hidden="true" tabindex="-1"></a><span class="in">  height = 600,</span></span>
+<span id="cb16-177"><a href="#cb16-177" aria-hidden="true" tabindex="-1"></a><span class="in">  width = 800,</span></span>
+<span id="cb16-178"><a href="#cb16-178" aria-hidden="true" tabindex="-1"></a><span class="in">  verbose = FALSE)</span></span>
+<span id="cb16-179"><a href="#cb16-179" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-180"><a href="#cb16-180" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-181"><a href="#cb16-181" aria-hidden="true" tabindex="-1"></a><span class="al">![](images/model_diagnostics.png)</span>{fig-align="center" width="700"}</span>
+<span id="cb16-182"><a href="#cb16-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-183"><a href="#cb16-183" aria-hidden="true" tabindex="-1"></a><span class="fu">## Structural Topic Modeling</span></span>
+<span id="cb16-184"><a href="#cb16-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-185"><a href="#cb16-185" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, eval = FALSE}</span></span>
+<span id="cb16-186"><a href="#cb16-186" aria-hidden="true" tabindex="-1"></a><span class="in">out &lt;- quanteda::convert(dfm, to = "stm")</span></span>
+<span id="cb16-187"><a href="#cb16-187" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-188"><a href="#cb16-188" aria-hidden="true" tabindex="-1"></a><span class="in">topic_model &lt;- stm(</span></span>
+<span id="cb16-189"><a href="#cb16-189" aria-hidden="true" tabindex="-1"></a><span class="in">  data = out$meta,</span></span>
+<span id="cb16-190"><a href="#cb16-190" aria-hidden="true" tabindex="-1"></a><span class="in">  documents = out$documents,</span></span>
+<span id="cb16-191"><a href="#cb16-191" aria-hidden="true" tabindex="-1"></a><span class="in">  vocab = out$vocab,</span></span>
+<span id="cb16-192"><a href="#cb16-192" aria-hidden="true" tabindex="-1"></a><span class="in">  max.em.its = 75,</span></span>
+<span id="cb16-193"><a href="#cb16-193" aria-hidden="true" tabindex="-1"></a><span class="in">  init.type = "Spectral",</span></span>
+<span id="cb16-194"><a href="#cb16-194" aria-hidden="true" tabindex="-1"></a><span class="in">  K = 14,</span></span>
+<span id="cb16-195"><a href="#cb16-195" aria-hidden="true" tabindex="-1"></a><span class="in">  prevalence = ~ c("Disability", "LD"), </span></span>
+<span id="cb16-196"><a href="#cb16-196" aria-hidden="true" tabindex="-1"></a><span class="in">  verbose = FALSE,</span></span>
+<span id="cb16-197"><a href="#cb16-197" aria-hidden="true" tabindex="-1"></a><span class="in">  seed = 1234)</span></span>
+<span id="cb16-198"><a href="#cb16-198" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-199"><a href="#cb16-199" aria-hidden="true" tabindex="-1"></a><span class="in">top_topic_terms &lt;- TextAnalysisR::select_top_topic_terms(</span></span>
+<span id="cb16-200"><a href="#cb16-200" aria-hidden="true" tabindex="-1"></a><span class="in">  stm_model = topic_model,</span></span>
+<span id="cb16-201"><a href="#cb16-201" aria-hidden="true" tabindex="-1"></a><span class="in">  top_term_n = 10,</span></span>
+<span id="cb16-202"><a href="#cb16-202" aria-hidden="true" tabindex="-1"></a><span class="in">  verbose = FALSE</span></span>
+<span id="cb16-203"><a href="#cb16-203" aria-hidden="true" tabindex="-1"></a><span class="in">)</span></span>
+<span id="cb16-204"><a href="#cb16-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-205"><a href="#cb16-205" aria-hidden="true" tabindex="-1"></a><span class="in">top_topic_terms %&gt;%</span></span>
+<span id="cb16-206"><a href="#cb16-206" aria-hidden="true" tabindex="-1"></a><span class="in">  mutate_if(is.numeric, ~ round(., 3)) %&gt;%</span></span>
+<span id="cb16-207"><a href="#cb16-207" aria-hidden="true" tabindex="-1"></a><span class="in">      DT::datatable(</span></span>
+<span id="cb16-208"><a href="#cb16-208" aria-hidden="true" tabindex="-1"></a><span class="in">      rownames = FALSE,</span></span>
+<span id="cb16-209"><a href="#cb16-209" aria-hidden="true" tabindex="-1"></a><span class="in">      extensions = 'Buttons',</span></span>
+<span id="cb16-210"><a href="#cb16-210" aria-hidden="true" tabindex="-1"></a><span class="in">      options = list(</span></span>
+<span id="cb16-211"><a href="#cb16-211" aria-hidden="true" tabindex="-1"></a><span class="in">        scrollX = TRUE,</span></span>
+<span id="cb16-212"><a href="#cb16-212" aria-hidden="true" tabindex="-1"></a><span class="in">        scrollY = "400px",</span></span>
+<span id="cb16-213"><a href="#cb16-213" aria-hidden="true" tabindex="-1"></a><span class="in">        width = "80%",</span></span>
+<span id="cb16-214"><a href="#cb16-214" aria-hidden="true" tabindex="-1"></a><span class="in">        dom = 'Bfrtip',</span></span>
+<span id="cb16-215"><a href="#cb16-215" aria-hidden="true" tabindex="-1"></a><span class="in">        buttons = c('copy', 'csv', 'excel', 'pdf', 'print')</span></span>
+<span id="cb16-216"><a href="#cb16-216" aria-hidden="true" tabindex="-1"></a><span class="in">      )</span></span>
+<span id="cb16-217"><a href="#cb16-217" aria-hidden="true" tabindex="-1"></a><span class="in">    ) %&gt;%</span></span>
+<span id="cb16-218"><a href="#cb16-218" aria-hidden="true" tabindex="-1"></a><span class="in">    DT::formatStyle(</span></span>
+<span id="cb16-219"><a href="#cb16-219" aria-hidden="true" tabindex="-1"></a><span class="in">      columns = c("topic", "term", "beta"),</span></span>
+<span id="cb16-220"><a href="#cb16-220" aria-hidden="true" tabindex="-1"></a><span class="in">      fontSize = '16px'</span></span>
+<span id="cb16-221"><a href="#cb16-221" aria-hidden="true" tabindex="-1"></a><span class="in">    )</span></span>
+<span id="cb16-222"><a href="#cb16-222" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-223"><a href="#cb16-223" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-224"><a href="#cb16-224" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Generate Policy Topic Labels Using OpenAI’s API</span></span>
+<span id="cb16-225"><a href="#cb16-225" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-226"><a href="#cb16-226" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, eval = FALSE}</span></span>
+<span id="cb16-227"><a href="#cb16-227" aria-hidden="true" tabindex="-1"></a><span class="in">#| code-fold: false</span></span>
+<span id="cb16-228"><a href="#cb16-228" aria-hidden="true" tabindex="-1"></a><span class="in"># Load the Open AI API key from the .env file in the working directory</span></span>
+<span id="cb16-229"><a href="#cb16-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-230"><a href="#cb16-230" aria-hidden="true" tabindex="-1"></a><span class="in">top_labeled_topic_terms &lt;- generate_topic_labels(</span></span>
+<span id="cb16-231"><a href="#cb16-231" aria-hidden="true" tabindex="-1"></a><span class="in">  top_topic_terms,</span></span>
+<span id="cb16-232"><a href="#cb16-232" aria-hidden="true" tabindex="-1"></a><span class="in">  model = "gpt-3.5-turbo",</span></span>
+<span id="cb16-233"><a href="#cb16-233" aria-hidden="true" tabindex="-1"></a><span class="in">  temperature = 0.5,</span></span>
+<span id="cb16-234"><a href="#cb16-234" aria-hidden="true" tabindex="-1"></a><span class="in">  verbose = FALSE)</span></span>
+<span id="cb16-235"><a href="#cb16-235" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-236"><a href="#cb16-236" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-237"><a href="#cb16-237" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, echo=FALSE}</span></span>
+<span id="cb16-238"><a href="#cb16-238" aria-hidden="true" tabindex="-1"></a><span class="in">top_labeled_topic_terms %&gt;%</span></span>
+<span id="cb16-239"><a href="#cb16-239" aria-hidden="true" tabindex="-1"></a><span class="in">  mutate_if(is.numeric, ~ round(., 3)) %&gt;%</span></span>
+<span id="cb16-240"><a href="#cb16-240" aria-hidden="true" tabindex="-1"></a><span class="in">      DT::datatable(</span></span>
+<span id="cb16-241"><a href="#cb16-241" aria-hidden="true" tabindex="-1"></a><span class="in">      rownames = FALSE,</span></span>
+<span id="cb16-242"><a href="#cb16-242" aria-hidden="true" tabindex="-1"></a><span class="in">      extensions = 'Buttons',</span></span>
+<span id="cb16-243"><a href="#cb16-243" aria-hidden="true" tabindex="-1"></a><span class="in">      options = list(</span></span>
+<span id="cb16-244"><a href="#cb16-244" aria-hidden="true" tabindex="-1"></a><span class="in">        scrollX = TRUE,</span></span>
+<span id="cb16-245"><a href="#cb16-245" aria-hidden="true" tabindex="-1"></a><span class="in">        scrollY = "400px",</span></span>
+<span id="cb16-246"><a href="#cb16-246" aria-hidden="true" tabindex="-1"></a><span class="in">        width = "80%",</span></span>
+<span id="cb16-247"><a href="#cb16-247" aria-hidden="true" tabindex="-1"></a><span class="in">        dom = 'Bfrtip',</span></span>
+<span id="cb16-248"><a href="#cb16-248" aria-hidden="true" tabindex="-1"></a><span class="in">        buttons = c('copy', 'csv', 'excel', 'pdf', 'print')</span></span>
+<span id="cb16-249"><a href="#cb16-249" aria-hidden="true" tabindex="-1"></a><span class="in">      )</span></span>
+<span id="cb16-250"><a href="#cb16-250" aria-hidden="true" tabindex="-1"></a><span class="in">    ) %&gt;%</span></span>
+<span id="cb16-251"><a href="#cb16-251" aria-hidden="true" tabindex="-1"></a><span class="in">    DT::formatStyle(</span></span>
+<span id="cb16-252"><a href="#cb16-252" aria-hidden="true" tabindex="-1"></a><span class="in">      columns = c("topic", "topic_label", "term", "beta"),</span></span>
+<span id="cb16-253"><a href="#cb16-253" aria-hidden="true" tabindex="-1"></a><span class="in">      fontSize = '16px'</span></span>
+<span id="cb16-254"><a href="#cb16-254" aria-hidden="true" tabindex="-1"></a><span class="in">    )</span></span>
+<span id="cb16-255"><a href="#cb16-255" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-256"><a href="#cb16-256" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-259"><a href="#cb16-259" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb16-260"><a href="#cb16-260" aria-hidden="true" tabindex="-1"></a><span class="co"># openxlsx::write.xlsx(top_labeled_topic_terms, "data/top_labeled_topic_terms.xlsx")</span></span>
+<span id="cb16-261"><a href="#cb16-261" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-262"><a href="#cb16-262" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-263"><a href="#cb16-263" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Probability of Words Observed in Each Topic (Beta)</span></span>
+<span id="cb16-264"><a href="#cb16-264" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-265"><a href="#cb16-265" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, eval = FALSE}</span></span>
+<span id="cb16-266"><a href="#cb16-266" aria-hidden="true" tabindex="-1"></a><span class="in">#| code-fold: false</span></span>
+<span id="cb16-267"><a href="#cb16-267" aria-hidden="true" tabindex="-1"></a><span class="in">word_probability_plot &lt;- word_probability_plot(</span></span>
+<span id="cb16-268"><a href="#cb16-268" aria-hidden="true" tabindex="-1"></a><span class="in">  top_labeled_topic_terms,</span></span>
+<span id="cb16-269"><a href="#cb16-269" aria-hidden="true" tabindex="-1"></a><span class="in">  topic_label = "topic_label",</span></span>
+<span id="cb16-270"><a href="#cb16-270" aria-hidden="true" tabindex="-1"></a><span class="in">  ncol = 2,</span></span>
+<span id="cb16-271"><a href="#cb16-271" aria-hidden="true" tabindex="-1"></a><span class="in">  height = 1800,</span></span>
+<span id="cb16-272"><a href="#cb16-272" aria-hidden="true" tabindex="-1"></a><span class="in">  width = 1500)</span></span>
+<span id="cb16-273"><a href="#cb16-273" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-274"><a href="#cb16-274" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-275"><a href="#cb16-275" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, echo=FALSE}</span></span>
+<span id="cb16-276"><a href="#cb16-276" aria-hidden="true" tabindex="-1"></a><span class="in">word_probability_plot</span></span>
+<span id="cb16-277"><a href="#cb16-277" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb16-278"><a href="#cb16-278" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-279"><a href="#cb16-279" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, echo=FALSE}</span></span>
+<span id="cb16-280"><a href="#cb16-280" aria-hidden="true" tabindex="-1"></a><span class="in">save(dfm, dfm_freq, out, top_labeled_topic_terms, word_probability_plot, topic_model, file = "data/ai_ld_data.rda")</span></span>
+<span id="cb16-281"><a href="#cb16-281" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+</code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
 </div> <!-- /content -->
 
 
