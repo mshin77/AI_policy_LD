@@ -1,8 +1,0 @@
-"0","#| code-fold: false"
-"0","common_words <- c(""na"", ""may"", ""can"", ""['’]s"")"
-"0","toks_removed_common <- tokens_remove(toks_removed, "
-"0","                                     pattern = common_words, "
-"0","                                     valuetype = ""regex"", "
-"0","                                     verbose = FALSE)"
-"0","dfm_removed <- dfm(toks_removed_common)"
-"0","plot_word_frequency(dfm_removed, n = 20)"
