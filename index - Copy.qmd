@@ -36,7 +36,6 @@ suppressPackageStartupMessages({
     library(spacyr)
     library(htmlwidgets)
     library(stm)
-    library(ggdendro)
 })
 ```
 
@@ -315,21 +314,11 @@ word_probability_plot
 
 ```{r}
 #| code-fold: false
-# Calculate topic correlation matrix with a lower cutoff
-topic_cor <- stm::topicCorr(topic_model, method = "simple", cutoff = 0.001)
+# Calculate topic correlation matrix
+topic_cor <- stm::topicCorr(topic_model, method = "simple", cutoff = 0.01)
 
-# If correlation matrix is empty, create a distance matrix directly from topic proportions
-if (nrow(topic_cor$cor) == 0) {
-  # Get topic proportions
-  topic_props <- stm::theta(topic_model)
-  
-  # Calculate cosine similarity between topics
-  topic_sim <- topic_props %*% t(topic_props)
-  topic_dist <- as.dist(1 - topic_sim)
-} else {
-  # Convert correlation matrix to distance matrix
-  topic_dist <- as.dist(1 - abs(topic_cor$cor))
-}
+# Convert correlation matrix to distance matrix
+topic_dist <- as.dist(1 - abs(topic_cor$cor))
 
 # Perform hierarchical clustering using Ward's method
 topic_hclust <- hclust(topic_dist, method = "ward.D2")
@@ -377,7 +366,7 @@ topic_clusters <- cutree(topic_hclust, k = num_clusters)
 
 # Create a data frame with topic clusters
 topic_cluster_df <- data.frame(
-  topic = as.character(1:length(topic_clusters)),
+  topic = names(topic_clusters),
   cluster = topic_clusters
 ) %>%
   arrange(cluster, topic)
@@ -462,16 +451,10 @@ Focus on creating clear, measurable items that capture the essence of each topic
     dplyr::arrange(desc(beta)) %>%
     dplyr::ungroup()
 
-  # Ensure topic numbers are consistent
   unique_topics <- top_topic_terms %>%
     dplyr::distinct(topic) %>%
     dplyr::arrange(as.numeric(topic)) %>%
-    dplyr::mutate(survey_item = NA)
-
-  # Ensure topic_clusters has the same topic numbers
-  topic_clusters <- topic_clusters %>%
-    dplyr::mutate(topic = as.character(topic)) %>%
-    dplyr::filter(topic %in% unique_topics$topic)
+    dplyr::mutate(topic = row_number(), survey_item = NA)
 
   if (verbose) {
     if (!requireNamespace("progress", quietly = TRUE)) {
@@ -577,28 +560,13 @@ Focus on creating clear, measurable items that capture the essence of each topic
 }
 ```
 
-#### Generate and Save Survey Items
-
-```{r}
-#| code-fold: false
-# Generate survey items using the topic modeling results
-survey_items <- generate_survey_items(
-  top_topic_terms = top_topic_terms,
-  model = "gpt-3.5-turbo",
-  temperature = 0.5,
-  verbose = TRUE
-)
-
-# Display the first few rows of the generated survey items
-head(survey_items)
-```
 
 ```{r, echo=FALSE}
 save(dfm, word_frequency_plot, word_frequency_remove_stopwords, word_frequency_remove_common,
      word_frequency_lemmatized, toks_removed_common, toks_removed, toks_lemmatized,
-     dfm_object, dfm_removed, dfm_init, tokens_compound, tokens_collocations,
-     tokens_dict, tokens, united_tbl, data_long, 
-     dend_plot, topic_hclust, topic_dist, topic_cor,
-     topic_cluster_df,
      out, top_labeled_topic_terms, word_probability_plot, topic_model, file = "data/ai_ld_data.rda")
 ```
+
+
+
+
