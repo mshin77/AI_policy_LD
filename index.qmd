@@ -25,7 +25,6 @@ suppressPackageStartupMessages({
     library(tidyr)
     library(dplyr)
     library(readxl)
-    library(brms)
     library(gtsummary)
     library(officer)
     library(flextable)
@@ -36,7 +35,13 @@ suppressPackageStartupMessages({
     library(spacyr)
     library(htmlwidgets)
     library(stm)
+    library(dotenv)
     library(ggdendro)
+    library(plotly)
+    library(httr)
+    library(jsonlite)
+    library(progress)
+    library(openxlsx)
 })
 ```
 
@@ -45,25 +50,24 @@ suppressPackageStartupMessages({
 ```{r}
 #| code-fold: false
 data <- read_excel("data/PolicyData.xlsx")
-# load("data/ai_ld_data.rda")
+load("data/ai_ld_data.rda")
 ```
 
 ## Preporcess Text Data
 
 #### Convert to a Long Format 
 
-```{r}
-#| code-fold: false
+```{r, eval=FALSE}
 data <- read_excel("data/PolicyData.xlsx")
 
-data_long <- data %>%
+data_long <- data |>
   pivot_longer(
     cols           = matches("^coding_\\d+$"),
     names_to       = "coding_id",
     names_prefix   = "coding_",
     values_to      = "coding_text",
     values_drop_na = TRUE
-  ) %>%
+  ) |>
   mutate(
     coding_id   = as.integer(coding_id),
     document_id = paste(ID, coding_id, sep = "_")
@@ -75,14 +79,14 @@ united_tbl <- unite_text_cols(data_long,
 
 #### Segment a Corpus Into Tokens
 
-```{r}
+```{r, eval=FALSE}
 #| code-fold: false
 tokens <- preprocess_texts(united_tbl, text_field = "united_texts", verbose = FALSE)
 ```
 
 #### Detect Multi-Word Expressions
 
-```{r}
+```{r, eval=FALSE}
 #| code-fold: false
 tokens_collocations <- detect_multi_word_expressions(tokens, size = 2:5, min_count = 2)
 tokens_dict <- quanteda::dictionary(
@@ -114,8 +118,7 @@ tokens_dict <- quanteda::dictionary(
 
 #### Process Tokens With Compound Words
 
-```{r}
-#| code-fold: false
+```{r, eval=FALSE}
 compound_tokens <- function(tokens, dict) {
   quanteda::tokens_compound(
     tokens,
@@ -135,7 +138,7 @@ tokens_compound <- compound_tokens(tokens, tokens_dict)
 
 #### Word Frequency
 
-```{r}
+```{r, eval=FALSE}
 #| code-fold: false
 dfm_object <- dfm(tokens_compound)
 
@@ -148,12 +151,12 @@ word_frequency_plot
 
 #### Remove Predefined Stopwords
 
-```{r}
+```{r, eval=FALSE}
 #| code-fold: false
 stopwords <- stopwords("en", source = "snowball")
 toks_removed <- tokens_remove(tokens_compound, pattern = stopwords, verbose = FALSE)
 dfm_init <- dfm(toks_removed)
-word_frequency_remove_stopwords <- plot_word_frequency(dfm_init, n = 40)
+word_frequency_remove_stopwords <- plot_word_frequency(dfm_init, n = 20)
 ```
 
 ```{r, echo=FALSE}
@@ -162,7 +165,7 @@ word_frequency_remove_stopwords
 
 #### Remove Common Words in the Dataset
 
-```{r}
+```{r, eval=FALSE}
 #| code-fold: false
 common_words <- c("na", "may", "can", "[''']s")
 toks_removed_common <- tokens_remove(toks_removed, 
@@ -181,7 +184,7 @@ word_frequency_remove_common
 
 ##### Word frequency  
 
-```{r}
+```{r, eval=FALSE}
 #| code-fold: false
 texts <- sapply(toks_removed_common, paste, collapse = " ")
 parsed <- spacy_parse(x = texts, lemma = TRUE, entity = FALSE, pos = FALSE)
@@ -218,8 +221,7 @@ evaluate_optimal_topic_number(
 
 ## Structural Topic Modeling
 
-```{r}
-#| code-fold: false
+```{r, eval=FALSE}
 out <- quanteda::convert(dfm, to = "stm")
 
 topic_model <- stm(
@@ -264,16 +266,16 @@ top_topic_terms %>%
 #| code-fold: false
 # Load the Open AI API key from the .env file in the working directory
 
-top_labeled_topic_terms <- generate_topic_labels(
-  top_topic_terms,
+top_labeled_topic_terms <- TextAnalysisR::generate_survey_items(
+  top_labeled_topic_terms ,
   model = "gpt-3.5-turbo",
   temperature = 0.5,
   verbose = FALSE)
 ```
 
-```{r, echo=FALSE}
-top_labeled_topic_terms %>%
-  mutate_if(is.numeric, ~ round(., 3)) %>%
+```{r, echo=FALSE, eval=FALSE}
+top_labeled_topic_terms |>
+  mutate_if(is.numeric, ~ round(., 3)) |>
       DT::datatable(
       rownames = FALSE,
       extensions = 'Buttons',
@@ -284,20 +286,20 @@ top_labeled_topic_terms %>%
         dom = 'Bfrtip',
         buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
       )
-    ) %>%
+    ) |>
     DT::formatStyle(
-      columns = c("topic", "topic_label", "term", "beta"),
+      columns = c("topic", "survey_item", "term", "beta"),
       fontSize = '16px'
     )
 ```
 
 ```{r}
-openxlsx::write.xlsx(top_labeled_topic_terms, "data/top_labeled_topic_terms.xlsx")
+# openxlsx::write.xlsx(top_labeled_topic_terms, "data/top_labeled_topic_terms.xlsx")
 ```
 
 #### Probability of Words Observed in Each Topic (Beta)
 
-```{r}
+```{r, eval=FALSE}
 #| code-fold: false
 word_probability_plot <- word_probability_plot(
   top_labeled_topic_terms,
@@ -313,116 +315,85 @@ word_probability_plot
 
 #### Topic Clustering and Dendrogram Visualization
 
-```{r}
-#| code-fold: false
-# Calculate topic correlation matrix with a lower cutoff
+```{r, eval=FALSE}
 topic_cor <- stm::topicCorr(topic_model, method = "simple", cutoff = 0.001)
 
-# If correlation matrix is empty, create a distance matrix directly from topic proportions
 if (nrow(topic_cor$cor) == 0) {
-  # Get topic proportions
   topic_props <- stm::theta(topic_model)
   
-  # Calculate cosine similarity between topics
   topic_sim <- topic_props %*% t(topic_props)
   topic_dist <- as.dist(1 - topic_sim)
 } else {
-  # Convert correlation matrix to distance matrix
   topic_dist <- as.dist(1 - abs(topic_cor$cor))
 }
 
-# Perform hierarchical clustering using Ward's method
 topic_hclust <- hclust(topic_dist, method = "ward.D2")
-
-# Create dendrogram plot using plotly
-library(plotly)
-
-# Create dendrogram data
 dend_data <- dendro_data(topic_hclust)
 
-# Create plotly dendrogram
-dend_plot <- plot_ly() %>%
-  add_segments(
+dend_plot <- ggplot() +
+  geom_segment(
     data = segment(dend_data),
-    x = ~x, y = ~y,
-    xend = ~xend, yend = ~yend
-  ) %>%
-  add_text(
+    aes(x = x, y = y, xend = xend, yend = yend)
+  ) +
+  geom_text(
     data = label(dend_data),
-    x = ~x, y = ~y,
-    text = ~label,
-    textposition = "middle right",
-    hoverinfo = "text"
-  ) %>%
-  layout(
+    aes(x = x, y = y, label = label),
+    hjust = -0.1,
+    size = 3
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank(),
+    panel.grid = element_blank()
+  ) +
+  labs(
     title = "Topic Clustering Dendrogram",
-    xaxis = list(
-      title = "",
-      showticklabels = FALSE,
-      zeroline = FALSE
-    ),
-    yaxis = list(
-      title = "Distance",
-      zeroline = FALSE
-    ),
-    showlegend = FALSE
+    y = "Distance",
+    x = ""
   )
 
-# Display the plot
-dend_plot
-
-# Cut the dendrogram to create clusters
-num_clusters <- 5  # Adjust this number based on your needs
-topic_clusters <- cutree(topic_hclust, k = num_clusters)
-
-# Create a data frame with topic clusters
-topic_cluster_df <- data.frame(
-  topic = as.character(1:length(topic_clusters)),
-  cluster = topic_clusters
-) %>%
-  arrange(cluster, topic)
-
-# Save topic clusters for later use
-write.csv(topic_cluster_df, "data/topic_clusters.csv", row.names = FALSE)
+dend_plot <- plotly::ggplotly(dend_plot) %>%
+  layout(
+    showlegend = FALSE,
+    hovermode = "closest",
+    width = 800,  
+    height = 600  
+  )
 ```
 
-#### Generate Policy Survey Items Based on Topic Modeling Results Using OpenAI's API
+```{r, echo=FALSE}
+dend_plot
+```
 
-```{r}
-generate_survey_items <- function(top_topic_terms,
-                                model = "gpt-3.5-turbo",
-                                system = NULL,
-                                user = NULL,
-                                temperature = 0.5,
-                                openai_api_key = NULL,
-                                verbose = TRUE) {
+#### Generate Policy Survey Items Using OpenAI's API
 
-  if (!requireNamespace("dotenv", quietly = TRUE) ||
-      !requireNamespace("httr", quietly = TRUE) ||
-      !requireNamespace("jsonlite", quietly = TRUE)) {
-    stop(
-      "The 'dotenv', 'httr', and 'jsonlite' packages are required for this functionality. ",
-      "Please install them using install.packages(c('dotenv', 'httr', 'jsonlite'))."
-    )
-  }
+
+```{r, eval=FALSE}
+# Reference: TextAnalysisR::generate_topic_labels()
+
+top_labeled_human_loop <- read_excel("data/top_labeled_topic_terms_human_loop.xlsx")
+
+generate_survey_items <- function(top_labeled_human_loop,
+                                  topic_cluster_df,
+                                  model = "gpt-3.5-turbo",
+                                  temperature = 0,
+                                  verbose = TRUE) {
 
   if (file.exists(".env")) {
     dotenv::load_dot_env()
-  }
-
-  if (is.null(openai_api_key)) {
     openai_api_key <- Sys.getenv("OPENAI_API_KEY")
-  }
-
-  if (nzchar(openai_api_key) == FALSE) {
-    stop("No OpenAI API key provided or found in OPENAI_API_KEY environment variable.")
+    if (openai_api_key == "") {
+      stop("OPENAI_API_KEY not found in .env file")
+    }
+  } else {
+    stop(".env file not found")
   }
 
   system <- "
-You are a highly skilled survey designer specializing in creating Likert-scale survey items for educational policy research.
-Your task is to generate clear, concise survey items that assess the importance of various AI policy aspects for students with learning disabilities.
+You are a highly skilled survey designer specializing in creating Likert-scale survey items for educational policy research. Your task is to generate clear, concise survey items that assess the importance of various AI policy aspects for students with learning disabilities.
 
-Guidelines for creating survey items:
+Guidelines for generating survey items:
 
 1. Format and Structure
    - Create statements that can be rated on a 5-point Likert scale (1=Strongly Disagree to 5=Strongly Agree)
@@ -447,31 +418,35 @@ Guidelines for creating survey items:
    - Avoid extreme language that might force responses to one end of the scale
    - Ensure items can be meaningfully rated on the agree-disagree continuum
 
-Example:
-Topic: Visual-based technology for mathematical problem solving
-Generated Survey Item: 'AI-powered visual manipulatives should be made available to support mathematical problem-solving for students with learning disabilities.'
+Example
+----------
+Top Terms (highest to lowest beta score):
+virtual manipulatives (.035)
+manipulatives (.022)
+mathematical (.014)
+app (.013)
+solving (.013)
+learning disability (.012)
+algebra (.012)
+area (.011)
+tool (.010)
+concrete manipulatives (.010)
+
+Generated Survey Item: 
+AI-powered visual manipulatives should be made available to support mathematical problem-solving for students with learning disabilities.
 
 Focus on creating clear, measurable items that capture the essence of each topic while following these guidelines.
 "
-
-  # Load topic clusters
-  topic_clusters <- read.csv("data/topic_clusters.csv")
   
-  top_topic_terms <- top_topic_terms %>%
+  top_topic_terms <- top_labeled_human_loop |>
     dplyr::group_by(topic) %>%
     dplyr::arrange(desc(beta)) %>%
     dplyr::ungroup()
 
-  # Ensure topic numbers are consistent
   unique_topics <- top_topic_terms %>%
     dplyr::distinct(topic) %>%
     dplyr::arrange(as.numeric(topic)) %>%
-    dplyr::mutate(survey_item = NA)
-
-  # Ensure topic_clusters has the same topic numbers
-  topic_clusters <- topic_clusters %>%
-    dplyr::mutate(topic = as.character(topic)) %>%
-    dplyr::filter(topic %in% unique_topics$topic)
+    dplyr::mutate(topic = row_number(), survey_item = NA)
 
   if (verbose) {
     if (!requireNamespace("progress", quietly = TRUE)) {
@@ -489,38 +464,30 @@ Focus on creating clear, measurable items that capture the essence of each topic
     }
 
     current_topic <- unique_topics$topic[i]
-    
-    # Get topic label and cluster
-    topic_info <- top_labeled_topic_terms %>%
-      dplyr::filter(topic == current_topic) %>%
-      dplyr::distinct(topic_label) %>%
-      dplyr::left_join(topic_clusters, by = "topic")
 
     selected_terms <- top_topic_terms %>%
       dplyr::filter(topic == current_topic) %>%
       dplyr::pull(term)
 
     user <- paste0(
-      "Topic Label: ", topic_info$topic_label, "\n",
-      "Cluster: ", topic_info$cluster, "\n",
-      "Top Terms (highest to lowest beta score): ",
+      "You have a topic with keywords listed from most to least significant:",
       paste(selected_terms, collapse = ", "), "\n\n",
-      "Please create a single survey item that:",
-      "1. Captures the essence of this topic",
-      "2. Can be rated on a 5-point Likert scale (1=Strongly Disagree to 5=Strongly Agree)",
-      "3. Focuses on the importance of this policy aspect",
-      "4. Uses person-first language",
+      "Please create a single survey item that:\n",
+      "1. Captures the essence of this topic\n",
+      "2. Can be rated on a 5-point Likert scale (1=Strongly Disagree to 5=Strongly Agree)\n",
+      "3. Focuses on the importance of this policy aspect\n",
+      "4. Uses person-first language\n",
       "5. Is clear, concise, and specific"
     )
 
-    body_list <- list(
+     body_list <- list(
       model = model,
       messages = list(
         list(role = "system", content = system),
         list(role = "user", content = user)
       ),
       temperature = temperature,
-      max_tokens = 100
+      max_tokens = 50
     )
 
     response <- httr::POST(
@@ -541,6 +508,11 @@ Focus on creating clear, measurable items that capture the essence of each topic
 
     res_json <- jsonlite::fromJSON(httr::content(response, "text", encoding = "UTF-8"))
 
+    if (verbose) {
+      cat("Response JSON structure for topic", i, ":\n")
+      print(str(res_json))
+    }
+
     if (!is.null(res_json$choices) && nrow(res_json$choices) > 0) {
       if (!is.null(res_json$choices$message$content)) {
         survey_item <- res_json$choices$message$content[1]
@@ -559,46 +531,63 @@ Focus on creating clear, measurable items that capture the essence of each topic
     Sys.sleep(1)
   }
 
-  # Create final output with clusters
-  survey_items <- unique_topics %>%
-    dplyr::left_join(topic_clusters, by = "topic") %>%
-    dplyr::left_join(
-      top_labeled_topic_terms %>%
-        dplyr::distinct(topic, topic_label),
-      by = "topic"
-    ) %>%
-    dplyr::select(cluster, topic, topic_label, survey_item) %>%
-    dplyr::arrange(cluster, topic)
+  top_labeled_topic_terms <- top_topic_terms %>%
+    dplyr::left_join(unique_topics, by = "topic") %>%
+    dplyr::select(survey_item, topic, term, beta) %>%
+    dplyr::arrange(topic, desc(beta))
 
-  # Save to Excel
-  openxlsx::write.xlsx(survey_items, "data/survey_items.xlsx")
-
-  return(survey_items)
+  return(top_labeled_topic_terms)
 }
 ```
 
-#### Generate and Save Survey Items
-
-```{r}
+```{r, eval=FALSE}
 #| code-fold: false
-# Generate survey items using the topic modeling results
-survey_items <- generate_survey_items(
-  top_topic_terms = top_topic_terms,
-  model = "gpt-3.5-turbo",
-  temperature = 0.5,
-  verbose = TRUE
-)
-
-# Display the first few rows of the generated survey items
-head(survey_items)
+policy_survey_items <- generate_survey_items(
+    top_labeled_human_loop,
+    topic_cluster_df,
+    model = "gpt-3.5-turbo",
+    temperature = 0,
+    verbose = TRUE)
 ```
 
 ```{r, echo=FALSE}
+policy_survey_items_dist <- 
+    policy_survey_items %>%
+    group_by(topic) %>%
+    summarise(
+        survey_item = first(survey_item),
+        term_beta = paste(term, "(", round(beta, 3), ")", collapse = ", ")
+    ) %>%
+    ungroup()
+
+policy_survey_items_dist %>%
+    DT::datatable(
+        rownames = FALSE,
+        extensions = 'Buttons',
+        options = list(
+            scrollX = TRUE,
+            scrollY = "400px",
+            width = "80%",
+            dom = 'Bfrtip',
+            buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
+        )
+    ) %>%
+    DT::formatStyle(
+        columns = c("topic", "survey_item", "term_beta"),
+        fontSize = '16px'
+    )
+
+openxlsx::write.xlsx(policy_survey_items_dist, "data/policy_survey_items.xlsx")
+```
+
+```{r, echo=FALSE, eval=FALSE}
 save(dfm, word_frequency_plot, word_frequency_remove_stopwords, word_frequency_remove_common,
      word_frequency_lemmatized, toks_removed_common, toks_removed, toks_lemmatized,
      dfm_object, dfm_removed, dfm_init, tokens_compound, tokens_collocations,
      tokens_dict, tokens, united_tbl, data_long, 
      dend_plot, topic_hclust, topic_dist, topic_cor,
      topic_cluster_df,
+     policy_survey_items,
+     policy_survey_items_dist,
      out, top_labeled_topic_terms, word_probability_plot, topic_model, file = "data/ai_ld_data.rda")
 ```
