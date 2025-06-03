@@ -49,16 +49,16 @@ suppressPackageStartupMessages({
 
 ```{r}
 #| code-fold: false
-data <- read_excel("data/PolicyData.xlsx")
+data <- read_excel("data/policyData.xlsx")
 load("data/ai_ld_data.rda")
 ```
 
-## Preporcess Text Data
+## Round 1 Delphi Survey
 
-#### Convert to a Long Format 
+#### Preporcess Text Data
 
 ```{r, eval=FALSE}
-data <- read_excel("data/PolicyData.xlsx")
+data <- read_excel("data/policyData.xlsx")
 
 data_long <- data |>
   pivot_longer(
@@ -197,9 +197,7 @@ word_frequency_lemmatized <- plot_word_frequency(dfm, n = 20)
 word_frequency_lemmatized 
 ```
 
-## Optimal Topic Numbers 
-
-#### Model Diagnostics 
+#### Model Diagnostics (Optimal Topic Numbers)
 
 ```{r, eval=FALSE}
 #| code-fold: false
@@ -219,7 +217,7 @@ evaluate_optimal_topic_number(
 
 ![](images/model_diagnostics.png){fig-align="center" width="700"}
 
-## Structural Topic Modeling
+#### Structural Topic Modeling
 
 ```{r, eval=FALSE}
 out <- quanteda::convert(dfm, to = "stm")
@@ -242,21 +240,17 @@ top_topic_terms <- TextAnalysisR::select_top_topic_terms(
 )
 
 top_topic_terms %>%
-  mutate_if(is.numeric, ~ round(., 3)) %>%
-      DT::datatable(
-      rownames = FALSE,
-      extensions = 'Buttons',
-      options = list(
-        scrollX = TRUE,
-        scrollY = "400px",
-        width = "80%",
-        dom = 'Bfrtip',
-        buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
-      )
-    ) %>%
-    DT::formatStyle(
-      columns = c("topic", "term", "beta"),
-      fontSize = '16px'
+  mutate_if(is.numeric, ~ round(., 3)) %>% 
+    DT::datatable(
+        options = list(
+            dom = 'Bfrtip',
+            buttons = c('copy', 'csv', 'excel', 'pdf'),
+            pageLength = 10,
+            scrollX = TRUE
+        ),
+        extensions = 'Buttons',
+        class = "cell-border stripe",
+        rownames = FALSE
     )
 ```
 
@@ -266,7 +260,7 @@ top_topic_terms %>%
 #| code-fold: false
 # Load the Open AI API key from the .env file in the working directory
 
-top_labeled_topic_terms <- TextAnalysisR::generate_survey_items(
+top_labeled_topic_terms <- TextAnalysisR::generate_topic_labels(
   top_labeled_topic_terms ,
   model = "gpt-3.5-turbo",
   temperature = 0.5,
@@ -353,7 +347,7 @@ dend_plot <- ggplot() +
     x = ""
   )
 
-dend_plot <- plotly::ggplotly(dend_plot) %>%
+dend_plotly <- plotly::ggplotly(dend_plot) %>%
   layout(
     showlegend = FALSE,
     hovermode = "closest",
@@ -363,11 +357,10 @@ dend_plot <- plotly::ggplotly(dend_plot) %>%
 ```
 
 ```{r, echo=FALSE}
-dend_plot
+dend_plotly
 ```
 
 #### Generate Policy Survey Items Using OpenAI's API
-
 
 ```{r, eval=FALSE}
 # Reference: TextAnalysisR::generate_topic_labels()
@@ -544,7 +537,7 @@ Focus on creating clear, measurable items that capture the essence of each topic
 #| code-fold: false
 policy_survey_items <- generate_survey_items(
     top_labeled_human_loop,
-    topic_cluster_df,
+    # topic_cluster_df,
     model = "gpt-3.5-turbo",
     temperature = 0,
     verbose = TRUE)
@@ -580,14 +573,379 @@ policy_survey_items_dist %>%
 openxlsx::write.xlsx(policy_survey_items_dist, "data/policy_survey_items.xlsx")
 ```
 
+## Round 2 Delphi Survey
+
+#### Round 1 Delphi Survey Results
+
+```{r}
+delphiFirst <- read_excel("data/delphiFirst.xlsx")
+
+likert <- c(
+  "Strongly Disagree" = 1,
+  "Disagree" = 2,
+  "Neutral" = 3,
+  "Agree" = 4,
+  "Strongly Agree" = 5
+)
+
+delphi_long <- delphiFirst %>%
+  pivot_longer(
+    cols = -c(
+      ID,
+      position:zip_code,           
+      starts_with("Q33_"),        
+      "Q34"                       # 
+    ),   
+    names_to = "Question",
+    values_to = "Rating"
+  ) %>%
+  mutate(
+    Rating = likert[Rating]      
+  )
+```
+
+#### Content Validity Ratio (CVR) by Question
+
+The Content Validity Ratio (CVR) is calculated using the following formula:
+
+$$CVR = \frac{N_e - N/2}{N/2}$$
+
+Where:
+- $N_e$ is the number of experts indicating "relevant" (ratings 4-5)
+- $N$ is the total number of non-neutral responses (ratings 1-2 and 4-5)
+- Neutral responses (rating 3) are excluded from the calculation
+
+Decision Rule:
+- CVR ≥ 0.80 → Retain item
+- CVR < 0.80 → Revise/Remove item
+
+```{r, eval=FALSE}
+round_1_cvr <- delphi_long %>%
+  group_by(Question) %>%
+  summarise(
+    Total_Experts = n(),
+    
+    Strongly_Disagree = sum(Rating == 1),
+    Disagree = sum(Rating == 2),
+    Neutral = sum(Rating == 3),
+    Agree = sum(Rating == 4),
+    Strongly_Agree = sum(Rating == 5),
+    
+    Essential_Count = sum(Rating >= 4),       
+    Not_Essential_Count = sum(Rating <= 2),    
+    Neutral_Count = sum(Rating == 3),          
+    
+    CVR_Relevant_Total = Essential_Count + Not_Essential_Count,
+    
+    CVR = ifelse(CVR_Relevant_Total > 0, 
+                 (Essential_Count - CVR_Relevant_Total/2) / (CVR_Relevant_Total/2), 
+                 0),
+    
+    CVR = round(CVR, 3),
+    
+    CVR_Decision = ifelse(CVR >= 0.80, "Retain", "Revise/Remove"),
+    
+    Mean_Rating = round(mean(Rating), 2),
+    SD_Rating = round(sd(Rating), 2),
+    Percent_Agreement = round((Essential_Count / Total_Experts) * 100, 1),
+    
+    .groups = 'drop'
+  )
+
+# openxlsx::write.xlsx(cvr_df, "results/round_1_cvr.xlsx", row.names = FALSE)
+```
+
+```{r, echo=FALSE}
+round_1_cvr %>%
+  mutate_if(is.numeric, ~ round(., 3)) %>% 
+    DT::datatable(
+        options = list(
+            dom = 'Bfrtip',
+            buttons = c('copy', 'csv', 'excel', 'pdf'),
+            pageLength = 10,
+            scrollX = TRUE
+        ),
+        extensions = 'Buttons',
+        class = "cell-border stripe",
+        rownames = FALSE
+    )
+```
+
+```{r, eval=FALSE}
+round_1_plot <- ggplot(round_1_cvr, aes(x = reorder(Question, CVR), y = CVR, fill = CVR_Decision)) +
+  geom_col() +
+  geom_hline(yintercept = 0.80, linetype = "dashed", color = "red", linewidth = 1) +
+  coord_flip() +
+  labs(title = "",
+       subtitle = "",
+       x = "Question", 
+       y = "CVR Value",
+       fill = "Decision") +
+  scale_fill_manual(values = c("Retain" = "darkgreen", "Revise/Remove" = "orange")) +
+  theme_minimal(base_size = 12) +
+  theme(
+    panel.grid.minor   = element_blank(),
+    panel.grid.major.x = element_line(color = "gray90"),
+    panel.grid.major.y = element_line(color = "gray90"),
+    strip.text         = element_text(size = 12),
+    axis.line.x        = element_line(color = "gray90"),
+    axis.line.y        = element_line(color = "gray90"),
+    axis.ticks.length  = unit(0.2, "cm"),
+    axis.text.x        = element_text(size = 12),
+    axis.text.y        = element_text(size = 12),
+    axis.title.x       = element_text(size = 12, margin = margin(t = 5)),
+    axis.title.y       = element_text(size = 12, margin = margin(r = 12), angle = 90, vjust = 0.5),
+    # plot.title = element_text(face = "bold", hjust = 0.5),
+    # plot.subtitle = element_text(hjust = 0.5, color = "gray40"),
+    legend.position = "right",
+    legend.text = element_text(size = 12)
+  )
+
+round_1_plotly <- plotly::ggplotly(round_1_plot, width = 800, height = 700)
+
+round_1_plotly <- round_1_plotly %>% plotly::layout(
+ annotations = list(
+    list(
+      x = 0,
+      y = -0.16,
+      text = "Note: Red line = CVR ≥ 0.80 threshold for Round 2 inclusion",
+      showarrow = FALSE,
+      xref = "paper",
+      yref = "paper",
+      font = list(size = 16, color = "gray40")
+    )
+  ),
+  margin = list(b = 100, t = 40, l = 40)  
+)
+```
+
+
+```{r, echo=FALSE}
+round_1_plotly
+```
+
+#### Response Distribution by Question
+
+```{r, eval=FALSE}
+round_1_dist <- delphi_long %>%
+  mutate(Response_Label = case_when(
+    Rating == 1 ~ "1-Strongly Disagree",
+    Rating == 2 ~ "2-Disagree", 
+    Rating == 3 ~ "3-Neutral",
+    Rating == 4 ~ "4-Agree",
+    Rating == 5 ~ "5-Strongly Agree"
+  )) %>%
+  count(Question, Response_Label) %>%
+  group_by(Question) %>%
+  mutate(Percentage = round(n/sum(n)*100, 1)) %>%
+  mutate(Rating5_Count = case_when(
+    Response_Label == "5-Strongly Agree" ~ n,
+    TRUE ~ 0
+  )) %>%
+  group_by(Question) %>%
+  mutate(Max_Rating5 = max(Rating5_Count))
+
+round_1_dist_plot <- ggplot(round_1_dist, aes(x = reorder(Question, Max_Rating5, decreasing = FALSE), y = n, fill = Response_Label)) +
+  geom_col(position = "stack") +
+  coord_flip() +
+  labs(title = "",
+       x = "Question", 
+       y = "Number of Responses",
+       fill = "Rating") +
+  scale_fill_brewer(type = "div", palette = "RdYlGn") +
+  theme_minimal(base_size = 12) +
+  theme(
+    panel.grid.minor   = element_blank(),
+    panel.grid.major.x = element_line(color = "gray90"),
+    panel.grid.major.y = element_line(color = "gray90"),
+    strip.text         = element_text(size = 12),
+    axis.line.x        = element_line(color = "gray90"),
+    axis.line.y        = element_line(color = "gray90"),
+    axis.ticks.length  = unit(0.2, "cm"),
+    axis.text.x        = element_text(size = 12),
+    axis.text.y        = element_text(size = 12),
+    axis.title.x       = element_text(size = 12, margin = margin(t = 5)),
+    axis.title.y       = element_text(size = 12, margin = margin(r = 12), angle = 90, vjust = 0.5),
+    # plot.title = element_text(face = "bold", hjust = 0.5),
+    # plot.subtitle = element_text(hjust = 0.5, color = "gray40"),
+    legend.position = "right",
+    legend.text = element_text(size = 12)
+  )
+
+round_1_dist_plotly <- plotly::ggplotly(round_1_dist_plot, width = 800, height = 700)
+```
+
+```{r, echo=FALSE}
+round_1_dist_plotly
+```
+
+#### Round 2 Delphi Survey Item Generation Based on Round 1 Open-Ended Responses
+
+```{r, eval=FALSE}
+united_tbl <- unite_text_cols(delphiFirst, 
+                              listed_vars = "Q34")
+
+tokens <- preprocess_texts(united_tbl, text_field = "united_texts", verbose = FALSE)
+
+tokens_collocations <- detect_multi_word_expressions(tokens, size = 2:5, min_count = 2)
+
+dfm_object <- dfm(tokens)
+
+word_frequency_plot <- plot_word_frequency(dfm_object, n = 20)
+
+stopwords <- stopwords("en", source = "snowball")
+
+toks_removed <- tokens_remove(tokens, pattern = stopwords, verbose = FALSE)
+
+dfm_init <- dfm(toks_removed)
+
+word_frequency_remove_stopwords <- plot_word_frequency(dfm_init, n = 20)
+
+common_words <- c("also")
+
+toks_removed_common <- tokens_remove(toks_removed, 
+                                     pattern = common_words, 
+                                     valuetype = "regex", 
+                                     verbose = FALSE)
+
+dfm_removed <- dfm(toks_removed_common)
+
+word_frequency_remove_common <- plot_word_frequency(dfm_removed, n = 20)
+
+texts <- sapply(toks_removed_common, paste, collapse = " ")
+
+parsed <- spacy_parse(x = texts, lemma = TRUE, entity = FALSE, pos = FALSE)
+
+toks_lemmatized <- as.tokens(parsed, use_lemma = TRUE)
+
+dfm <- dfm(toks_lemmatized)
+
+word_frequency_lemmatized <- plot_word_frequency(dfm, n = 20)
+
+evaluate_optimal_topic_number(
+    dfm_object = dfm,
+    topic_range = 5:20,
+    max.em.its = 75,
+    categorical_var = NULL,
+    continuous_var = "",
+    height = 600,
+    width = 800,
+    verbose = FALSE)
+```
+
+![](images/model_diagnostics_round_1.png){fig-align="center" width="700"}
+
+```{r, eval=FALSE}
+out <- quanteda::convert(dfm, to = "stm")
+
+topic_model_round_1 <- stm(
+    data = out$meta,
+    documents = out$documents,
+    vocab = out$vocab,
+    max.em.its = 75,
+    init.type = "Spectral",
+    K = 11,
+    prevalence = ~ 1, 
+    verbose = FALSE,
+    seed = 1234)
+
+top_topic_terms_round_1 <- TextAnalysisR::select_top_topic_terms(
+    stm_model = topic_model_round_1,
+    top_term_n = 10,
+    verbose = FALSE
+)
+
+# top_topic_terms_round_1 %>%
+#     mutate_if(is.numeric, ~ round(., 3)) %>% 
+#     DT::datatable(
+#         options = list(
+#             dom = 'Bfrtip',
+#             buttons = c('copy', 'csv', 'excel', 'pdf'),
+#             pageLength = 10,
+#             scrollX = TRUE
+#         ),
+#         extensions = 'Buttons',
+#         class = "cell-border stripe",
+#         rownames = FALSE
+#     )
+
+top_labeled_topic_terms_round_1 <- TextAnalysisR::generate_topic_labels(
+    top_topic_terms_round_1 ,
+    model = "gpt-3.5-turbo",
+    temperature = 0.5,
+    verbose = FALSE)
+
+# openxlsx::write.xlsx(top_labeled_topic_terms_round_1, "data/top_labeled_topic_terms_round_1.xlsx")
+```
+
+```{r, echo=FALSE}
+top_labeled_topic_terms_round_1 |>
+    mutate_if(is.numeric, ~ round(., 3)) |>
+    DT::datatable(
+        rownames = FALSE,
+        extensions = 'Buttons',
+        options = list(
+            scrollX = TRUE,
+            scrollY = "400px",
+            width = "80%",
+            dom = 'Bfrtip',
+            buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
+        )
+    ) 
+```
+
+
+```{r, eval=FALSE}
+policy_survey_items_round_1 <- generate_survey_items(
+    top_labeled_topic_terms_round_1,
+    model = "gpt-3.5-turbo",
+    temperature = 0,
+    verbose = TRUE)
+
+policy_survey_items_round_1_td <- 
+    policy_survey_items_round_1 %>%
+    group_by(topic) %>%
+    summarise(
+        survey_item = first(survey_item),
+        term_beta = paste(term, "(", round(beta, 3), ")", collapse = ", ")
+    ) %>%
+    ungroup()
+
+# openxlsx::write.xlsx(policy_survey_items_round_1_td, "data/policy_survey_items_round_1_td.xlsx")
+```
+
+```{r, echo=FALSE}
+policy_survey_items_round_1_td %>%
+    DT::datatable(
+        rownames = FALSE,
+        extensions = 'Buttons',
+        options = list(
+            scrollX = TRUE,
+            scrollY = "400px",
+            width = "80%",
+            dom = 'Bfrtip',
+            buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
+        )
+    ) %>%
+    DT::formatStyle(
+        columns = c("topic", "survey_item", "term_beta"),
+        fontSize = '16px'
+    )
+```
+
+
 ```{r, echo=FALSE, eval=FALSE}
 save(dfm, word_frequency_plot, word_frequency_remove_stopwords, word_frequency_remove_common,
      word_frequency_lemmatized, toks_removed_common, toks_removed, toks_lemmatized,
      dfm_object, dfm_removed, dfm_init, tokens_compound, tokens_collocations,
      tokens_dict, tokens, united_tbl, data_long, 
-     dend_plot, topic_hclust, topic_dist, topic_cor,
+     dend_plot, dend_plotly, topic_hclust, topic_dist, topic_cor,
      topic_cluster_df,
      policy_survey_items,
      policy_survey_items_dist,
-     out, top_labeled_topic_terms, word_probability_plot, topic_model, file = "data/ai_ld_data.rda")
+     out, top_labeled_topic_terms, word_probability_plot, topic_model, 
+     round_1_cvr, round_1_plot, round_1_plotly, 
+     round_1_dist, round_1_dist_plot, round_1_dist_plotly, 
+     topic_model_round_1, top_labeled_topic_terms_round_1 , policy_survey_items_round_1_td, 
+     file = "data/ai_ld_data.rda")
 ```
