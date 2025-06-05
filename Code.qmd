@@ -670,7 +670,7 @@ round_1_dist_plotly
 
 #### Round 1 Delphi Survey Results Table
 
-Decision Rule:\
+Decision Rule Based on Experts' Consensus and Content Validity Ratio (CVR):\
 - 75% or more of experts agree (Rating ≥ 4) & CVR \>= 0.60 → Retain\
 - 70% or more of experts agree (Rating ≥ 4) & CVR \>= 0.60 → Consider\
 - 75% or more of experts agree (Rating ≥ 4) & CVR \< 0.60 → Consider\
