@@ -15,7 +15,6 @@ The website contains supplemental materials and code used to analyze text data i
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 ```
 
-
 ## Set Up
 
 #### Load R Packages
@@ -182,7 +181,7 @@ word_frequency_remove_common
 
 #### Lemmatize Tokens
 
-##### Word frequency  
+##### Word frequency
 
 ```{r, eval=FALSE}
 #| code-fold: false
@@ -575,9 +574,9 @@ openxlsx::write.xlsx(policy_survey_items_dist, "data/policy_survey_items.xlsx")
 
 ## Round 2 Delphi Survey
 
-#### Round 1 Delphi Survey Results
+#### Round 1 Response Distribution by Question
 
-```{r}
+```{r, eval=FALSE}
 delphiFirst <- read_excel("data/delphiFirst.xlsx")
 
 likert <- c(
@@ -588,188 +587,78 @@ likert <- c(
   "Strongly Agree" = 5
 )
 
+question_levels <- sort(as.numeric(gsub("Q", "", unique(delphiFirst %>% 
+  select(matches("^Q[0-9]+$")) %>% 
+  names()))))
+
+question_levels <- paste0("Q", question_levels)
+
 delphi_long <- delphiFirst %>%
   pivot_longer(
     cols = -c(
       ID,
       position:zip_code,           
       starts_with("Q33_"),        
-      "Q34"                       # 
+      "Q34"                       
     ),   
     names_to = "Question",
     values_to = "Rating"
   ) %>%
   mutate(
-    Rating = likert[Rating]      
-  )
-```
-
-#### Content Validity Ratio (CVR) by Question
-
-The Content Validity Ratio (CVR) is calculated using the following formula:
-
-$$CVR = \frac{N_e - N/2}{N/2}$$
-
-Where:
-- $N_e$ is the number of experts indicating "relevant" (ratings 4-5)
-- $N$ is the total number of non-neutral responses (ratings 1-2 and 4-5)
-- Neutral responses (rating 3) are excluded from the calculation
-
-Decision Rule:
-- CVR ≥ 0.80 → Retain item
-- CVR < 0.80 → Revise/Remove item
-
-```{r, eval=FALSE}
-round_1_cvr <- delphi_long %>%
-  group_by(Question) %>%
-  summarise(
-    Total_Experts = n(),
-    
-    Strongly_Disagree = sum(Rating == 1),
-    Disagree = sum(Rating == 2),
-    Neutral = sum(Rating == 3),
-    Agree = sum(Rating == 4),
-    Strongly_Agree = sum(Rating == 5),
-    
-    Essential_Count = sum(Rating >= 4),       
-    Not_Essential_Count = sum(Rating <= 2),    
-    Neutral_Count = sum(Rating == 3),          
-    
-    CVR_Relevant_Total = Essential_Count + Not_Essential_Count,
-    
-    CVR = ifelse(CVR_Relevant_Total > 0, 
-                 (Essential_Count - CVR_Relevant_Total/2) / (CVR_Relevant_Total/2), 
-                 0),
-    
-    CVR = round(CVR, 3),
-    
-    CVR_Decision = ifelse(CVR >= 0.80, "Retain", "Revise/Remove"),
-    
-    Mean_Rating = round(mean(Rating), 2),
-    SD_Rating = round(sd(Rating), 2),
-    Percent_Agreement = round((Essential_Count / Total_Experts) * 100, 1),
-    
-    .groups = 'drop'
+    Rating = likert[Rating],
+    Question = factor(Question, levels = question_levels)
   )
 
-# openxlsx::write.xlsx(cvr_df, "results/round_1_cvr.xlsx", row.names = FALSE)
-```
-
-```{r, echo=FALSE}
-round_1_cvr %>%
-  mutate_if(is.numeric, ~ round(., 3)) %>% 
-    DT::datatable(
-        options = list(
-            dom = 'Bfrtip',
-            buttons = c('copy', 'csv', 'excel', 'pdf'),
-            pageLength = 10,
-            scrollX = TRUE
-        ),
-        extensions = 'Buttons',
-        class = "cell-border stripe",
-        rownames = FALSE
-    )
-```
-
-```{r, eval=FALSE}
-round_1_plot <- ggplot(round_1_cvr, aes(x = reorder(Question, CVR), y = CVR, fill = CVR_Decision)) +
-  geom_col() +
-  geom_hline(yintercept = 0.80, linetype = "dashed", color = "red", linewidth = 1) +
-  coord_flip() +
-  labs(title = "",
-       subtitle = "",
-       x = "Question", 
-       y = "CVR Value",
-       fill = "Decision") +
-  scale_fill_manual(values = c("Retain" = "darkgreen", "Revise/Remove" = "orange")) +
-  theme_minimal(base_size = 12) +
-  theme(
-    panel.grid.minor   = element_blank(),
-    panel.grid.major.x = element_line(color = "gray90"),
-    panel.grid.major.y = element_line(color = "gray90"),
-    strip.text         = element_text(size = 12),
-    axis.line.x        = element_line(color = "gray90"),
-    axis.line.y        = element_line(color = "gray90"),
-    axis.ticks.length  = unit(0.2, "cm"),
-    axis.text.x        = element_text(size = 12),
-    axis.text.y        = element_text(size = 12),
-    axis.title.x       = element_text(size = 12, margin = margin(t = 5)),
-    axis.title.y       = element_text(size = 12, margin = margin(r = 12), angle = 90, vjust = 0.5),
-    # plot.title = element_text(face = "bold", hjust = 0.5),
-    # plot.subtitle = element_text(hjust = 0.5, color = "gray40"),
-    legend.position = "right",
-    legend.text = element_text(size = 12)
-  )
-
-round_1_plotly <- plotly::ggplotly(round_1_plot, width = 800, height = 700)
-
-round_1_plotly <- round_1_plotly %>% plotly::layout(
- annotations = list(
-    list(
-      x = 0,
-      y = -0.16,
-      text = "Note: Red line = CVR ≥ 0.80 threshold for Round 2 inclusion",
-      showarrow = FALSE,
-      xref = "paper",
-      yref = "paper",
-      font = list(size = 16, color = "gray40")
-    )
-  ),
-  margin = list(b = 100, t = 40, l = 40)  
-)
-```
-
-
-```{r, echo=FALSE}
-round_1_plotly
-```
-
-#### Response Distribution by Question
-
-```{r, eval=FALSE}
 round_1_dist <- delphi_long %>%
   mutate(Response_Label = case_when(
-    Rating == 1 ~ "1-Strongly Disagree",
-    Rating == 2 ~ "2-Disagree", 
-    Rating == 3 ~ "3-Neutral",
-    Rating == 4 ~ "4-Agree",
-    Rating == 5 ~ "5-Strongly Agree"
+    Rating == 1 ~ "Strongly Disagree",
+    Rating == 2 ~ "Disagree", 
+    Rating == 3 ~ "Neutral",
+    Rating == 4 ~ "Agree",
+    Rating == 5 ~ "Strongly Agree"
   )) %>%
   count(Question, Response_Label) %>%
   group_by(Question) %>%
-  mutate(Percentage = round(n/sum(n)*100, 1)) %>%
-  mutate(Rating5_Count = case_when(
-    Response_Label == "5-Strongly Agree" ~ n,
-    TRUE ~ 0
-  )) %>%
-  group_by(Question) %>%
-  mutate(Max_Rating5 = max(Rating5_Count))
+  mutate(
+    Percentage = round(n / sum(n) * 100, 1),
+    Rating_Count = ifelse(Response_Label == "Strongly Agree", n, 0),
+    Max_Rating = max(Rating_Count)
+  )
 
-round_1_dist_plot <- ggplot(round_1_dist, aes(x = reorder(Question, Max_Rating5, decreasing = FALSE), y = n, fill = Response_Label)) +
+round_1_dist <- round_1_dist %>%
+  mutate(Response_Label = factor(Response_Label, levels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")))
+
+round_1_dist <- round_1_dist %>%
+  left_join(
+    round_1_results %>% select(Question, Percent_Agreement),
+    by = "Question"
+  )
+
+round_1_dist_plot <- ggplot(
+    round_1_dist,
+    aes(x = reorder(Question, Percent_Agreement), y = n, fill = Response_Label)
+  ) +
   geom_col(position = "stack") +
   coord_flip() +
-  labs(title = "",
-       x = "Question", 
-       y = "Number of Responses",
-       fill = "Rating") +
+  labs(
+    title = "Distribution of Responses by Question",
+    x = "Question", 
+    y = "Number of Responses",
+    fill = "Rating"
+  ) +
   scale_fill_brewer(type = "div", palette = "RdYlGn") +
+  guides(fill = guide_legend(reverse = FALSE)) + 
   theme_minimal(base_size = 12) +
   theme(
     panel.grid.minor   = element_blank(),
     panel.grid.major.x = element_line(color = "gray90"),
     panel.grid.major.y = element_line(color = "gray90"),
-    strip.text         = element_text(size = 12),
-    axis.line.x        = element_line(color = "gray90"),
-    axis.line.y        = element_line(color = "gray90"),
-    axis.ticks.length  = unit(0.2, "cm"),
     axis.text.x        = element_text(size = 12),
     axis.text.y        = element_text(size = 12),
-    axis.title.x       = element_text(size = 12, margin = margin(t = 5)),
-    axis.title.y       = element_text(size = 12, margin = margin(r = 12), angle = 90, vjust = 0.5),
-    # plot.title = element_text(face = "bold", hjust = 0.5),
-    # plot.subtitle = element_text(hjust = 0.5, color = "gray40"),
-    legend.position = "right",
-    legend.text = element_text(size = 12)
+    axis.title.x       = element_text(size = 12),
+    axis.title.y       = element_text(size = 12),
+    legend.position    = "right",
+    legend.text        = element_text(size = 12)
   )
 
 round_1_dist_plotly <- plotly::ggplotly(round_1_dist_plot, width = 800, height = 700)
@@ -777,6 +666,158 @@ round_1_dist_plotly <- plotly::ggplotly(round_1_dist_plot, width = 800, height =
 
 ```{r, echo=FALSE}
 round_1_dist_plotly
+```
+
+#### Round 1 Delphi Survey Results Table
+
+Decision Rule:\
+- 75% or more of experts agree (Rating ≥ 4) & CVR \>= 0.60 → Retain\
+- 70% or more of experts agree (Rating ≥ 4) & CVR \>= 0.60 → Consider\
+- 75% or more of experts agree (Rating ≥ 4) & CVR \< 0.60 → Consider\
+- Otherwise → Revise/Remove
+
+```{r, eval=FALSE}
+round_1_results <- delphi_long %>%
+  group_by(Question) %>%
+  summarise(
+    Total = n(),
+    Strongly_Disagree = sum(Rating == 1),
+    Disagree = sum(Rating == 2),
+    Neutral = sum(Rating == 3),
+    Agree = sum(Rating == 4),
+    Strongly_Agree = sum(Rating == 5),
+    Agreement_Count = sum(Rating >= 4),
+    Percent_Agreement = round((Agreement_Count / Total) * 100, 1),
+    Mean = round(mean(Rating), 2),
+    SD = round(sd(Rating), 2),
+    Essential = sum(Rating >= 4),
+    CVR = round((Essential - (Total / 2)) / (Total / 2), 3),
+    IQR = IQR(Rating),
+    Consensus_Decision = case_when(
+      Percent_Agreement >= 75 ~ "Retain",
+      Percent_Agreement >= 70 ~ "Consider",
+      TRUE ~ "Revise/Remove"
+    ),
+    CVR_Decision = ifelse(CVR >= 0.60, "Retain", "Revise/Remove"),
+    Final_Decision = case_when(
+      Percent_Agreement >= 75 & CVR >= 0.60 ~ "Retain",
+      Percent_Agreement >= 70 & CVR >= 0.60 ~ "Consider",
+      Percent_Agreement >= 75 & CVR < 0.60 ~ "Consider",
+      TRUE ~ "Revise/Remove"
+    ),
+    .groups = 'drop'
+  ) %>%
+  ungroup() %>%
+  mutate(
+    Question = factor(
+      Question,
+      levels = Question[order(as.numeric(gsub("Q", "", Question)))]
+    )
+  )
+
+# openxlsx::write.xlsx(round_1_results, "results/round_1_results.xlsx", row.names = FALSE)
+
+round_1_results_label <- read_excel("results/round_1_results_label.xlsx")
+```
+
+```{r, echo=FALSE}
+round_1_results_label %>%
+    dplyr::select(Question, Label) %>%
+      DT::datatable(
+    options = list(
+      dom = 'Bfrtip',
+      buttons = c('copy', 'csv', 'excel', 'pdf'),
+      pageLength = 10,
+      scrollX = TRUE
+    ),
+    extensions = 'Buttons',
+    class = "cell-border stripe",
+    rownames = FALSE
+  )
+```
+
+```{r, echo=FALSE}
+round_1_results %>%
+  mutate(across(where(is.numeric), ~ round(., 2))) %>%
+  DT::datatable(
+    options = list(
+      dom = 'Bfrtip',
+      buttons = c('copy', 'csv', 'excel', 'pdf'),
+      pageLength = 10,
+      scrollX = TRUE
+    ),
+    extensions = 'Buttons',
+    class = "cell-border stripe",
+    rownames = FALSE
+  )
+```
+
+#### Round 1 Delphi Survey Results Plot
+
+```{r, eval=FALSE}
+round_1_results <- round_1_results %>%
+  mutate(Final_Decision = factor(Final_Decision, levels = c("Retain", "Consider", "Revise/Remove")))
+
+round_1_results <- round_1_results %>%
+  mutate(
+    tooltip_label = paste0(
+      "Agreement: ", Percent_Agreement, "%\n",
+      "CVR: ", round(CVR, 2), "\n",
+      "Final Decision: ", Final_Decision
+    )
+  )
+
+round_1_plot <- ggplot(round_1_results, aes(
+  x = reorder(Question, Percent_Agreement),
+  y = Percent_Agreement,
+  fill = Final_Decision,
+  text = tooltip_label
+)) +
+  geom_col() +
+  geom_hline(yintercept = 75, linetype = "dashed", color = "blue") +
+  coord_flip() +
+  labs(
+    title = "",
+    subtitle = "",
+    x = "Question",
+    y = "Percent Agreement",
+    fill = "Final Decision"
+  ) +
+  scale_fill_manual(values = c(
+    "Retain" = "darkgreen",
+    "Consider" = "#6B8E23",
+    "Revise/Remove" = "orange"
+  )) +
+  theme_minimal(base_size = 12) +
+  theme(
+    axis.text.x      = element_text(size = 12),
+    axis.text.y      = element_text(size = 12),
+    axis.title.x     = element_text(size = 12),
+    axis.title.y     = element_text(size = 12),
+    legend.position  = "right",
+    legend.text      = element_text(size = 12)
+  )
+
+round_1_plotly <- plotly::ggplotly(round_1_plot, width = 800, height = 700, tooltip = "text") %>%
+  plotly::layout(
+    annotations = list(
+      list(
+        x = 0,
+        y = -0.16,
+        text = "Blue line = 75% agreement threshold (Delphi consensus)",
+        showarrow = FALSE,
+        xref = "paper",
+        yref = "paper",
+        font = list(size = 16, color = "gray40")
+      )
+    ),
+    margin = list(b = 100, t = 40, l = 40)
+  )
+
+```
+
+```{r, echo=FALSE}
+round_1_plotly
 ```
 
 #### Round 2 Delphi Survey Item Generation Based on Round 1 Open-Ended Responses
@@ -894,7 +935,6 @@ top_labeled_topic_terms_round_1 |>
     ) 
 ```
 
-
 ```{r, eval=FALSE}
 policy_survey_items_round_1 <- generate_survey_items(
     top_labeled_topic_terms_round_1,
@@ -933,7 +973,6 @@ policy_survey_items_round_1_td %>%
     )
 ```
 
-
 ```{r, echo=FALSE, eval=FALSE}
 save(dfm, word_frequency_plot, word_frequency_remove_stopwords, word_frequency_remove_common,
      word_frequency_lemmatized, toks_removed_common, toks_removed, toks_lemmatized,
@@ -944,7 +983,7 @@ save(dfm, word_frequency_plot, word_frequency_remove_stopwords, word_frequency_r
      policy_survey_items,
      policy_survey_items_dist,
      out, top_labeled_topic_terms, word_probability_plot, topic_model, 
-     round_1_cvr, round_1_plot, round_1_plotly, 
+     round_1_results, round_1_results_label, round_1_plot, round_1_plotly, 
      round_1_dist, round_1_dist_plot, round_1_dist_plotly, 
      topic_model_round_1, top_labeled_topic_terms_round_1 , policy_survey_items_round_1_td, 
      file = "data/ai_ld_data.rda")
