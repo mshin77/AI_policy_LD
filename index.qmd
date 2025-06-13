@@ -52,6 +52,28 @@ data <- read_excel("data/policyData.xlsx")
 load("data/ai_ld_data.rda")
 ```
 
+## Participants
+
+```{r, echo=FALSE}
+delphiFirst <- read_excel("data/delphiFirst.xlsx")
+
+demo_tbl <- delphiFirst %>%
+  dplyr::select(position, school_level, spanish_hispanic_latino, race, sex) %>%
+  tbl_summary(
+              percent = "column") 
+  
+demo_tbl_ft <- as_flex_table(demo_tbl)
+
+read_docx() %>%
+  body_add_flextable(demo_tbl_ft) %>%
+  print(target = "data/demo_tbl_ft.docx")
+```
+
+```{r}
+demo_tbl_ft
+```
+
+
 ## Round 1 Delphi Survey
 
 #### Preporcess Text Data
@@ -118,6 +140,8 @@ tokens_dict <- quanteda::dictionary(
 #### Process Tokens With Compound Words
 
 ```{r, eval=FALSE}
+spacy_initialize()
+
 compound_tokens <- function(tokens, dict) {
   quanteda::tokens_compound(
     tokens,
@@ -200,18 +224,25 @@ word_frequency_lemmatized
 
 ```{r, eval=FALSE}
 #| code-fold: false
-dfm@docvars$disability <- as.factor(data_long$disability)
-dfm@docvars$LD <- as.factor(data_long$LD)
+texts <- sapply(toks_removed_common, paste, collapse = " ")
+parsed <- spacy_parse(x = texts, lemma = TRUE, entity = FALSE, pos = FALSE)
+toks_lemmatized <- as.tokens(parsed, use_lemma = TRUE)
+dfm <- dfm(toks_lemmatized)
+word_frequency_lemmatized <- plot_word_frequency(dfm, n = 20)
 
+# First, let's check the dimensions of our dfm
+print(dim(dfm))
+
+# Then evaluate with a smaller topic range
 evaluate_optimal_topic_number(
-  dfm_object = dfm,
-  topic_range = 5:50,
-  max.em.its = 75,
-  categorical_var = c("disability", "LD"),
-  continuous_var = "",
-  height = 600,
-  width = 800,
-  verbose = FALSE)
+    dfm_object = dfm,
+    topic_range = 2:8,  # Reduced range
+    max.em.its = 50,    # Reduced iterations
+    categorical_var = NULL,
+    continuous_var = "",
+    height = 600,
+    width = 800,
+    verbose = TRUE)     # Set to TRUE to see more information
 ```
 
 ![](images/model_diagnostics.png){fig-align="center" width="700"}
@@ -361,7 +392,7 @@ dend_plotly
 
 #### Generate Policy Survey Items Using OpenAI's API
 
-```{r, eval=FALSE}
+```{r}
 # Reference: TextAnalysisR::generate_topic_labels()
 
 top_labeled_human_loop <- read_excel("data/top_labeled_topic_terms_human_loop.xlsx")
@@ -574,9 +605,15 @@ openxlsx::write.xlsx(policy_survey_items_dist, "data/policy_survey_items.xlsx")
 
 ## Round 2 Delphi Survey
 
-#### Round 1 Response Distribution by Question
+#### Round 1 Delphi Survey Results Table
 
-```{r, eval=FALSE}
+Decision Rule Based on Experts' Consensus and Content Validity Ratio (CVR):\
+- 75% or more of experts agree (Rating ≥ 4) & CVR \>= 0.60 → Retain\
+- 70% or more of experts agree (Rating ≥ 4) & CVR \>= 0.60 → Consider\
+- 75% or more of experts agree (Rating ≥ 4) & CVR \< 0.60 → Consider\
+- Otherwise → Revise/Remove
+
+```{r}
 delphiFirst <- read_excel("data/delphiFirst.xlsx")
 
 likert <- c(
@@ -609,74 +646,6 @@ delphi_long <- delphiFirst %>%
     Question = factor(Question, levels = question_levels)
   )
 
-round_1_dist <- delphi_long %>%
-  mutate(Response_Label = case_when(
-    Rating == 1 ~ "Strongly Disagree",
-    Rating == 2 ~ "Disagree", 
-    Rating == 3 ~ "Neutral",
-    Rating == 4 ~ "Agree",
-    Rating == 5 ~ "Strongly Agree"
-  )) %>%
-  count(Question, Response_Label) %>%
-  group_by(Question) %>%
-  mutate(
-    Percentage = round(n / sum(n) * 100, 1),
-    Rating_Count = ifelse(Response_Label == "Strongly Agree", n, 0),
-    Max_Rating = max(Rating_Count)
-  )
-
-round_1_dist <- round_1_dist %>%
-  mutate(Response_Label = factor(Response_Label, levels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")))
-
-round_1_dist <- round_1_dist %>%
-  left_join(
-    round_1_results %>% select(Question, Percent_Agreement),
-    by = "Question"
-  )
-
-round_1_dist_plot <- ggplot(
-    round_1_dist,
-    aes(x = reorder(Question, Percent_Agreement), y = n, fill = Response_Label)
-  ) +
-  geom_col(position = "stack") +
-  coord_flip() +
-  labs(
-    title = "Distribution of Responses by Question",
-    x = "Question", 
-    y = "Number of Responses",
-    fill = "Rating"
-  ) +
-  scale_fill_brewer(type = "div", palette = "RdYlGn") +
-  guides(fill = guide_legend(reverse = FALSE)) + 
-  theme_minimal(base_size = 12) +
-  theme(
-    panel.grid.minor   = element_blank(),
-    panel.grid.major.x = element_line(color = "gray90"),
-    panel.grid.major.y = element_line(color = "gray90"),
-    axis.text.x        = element_text(size = 12),
-    axis.text.y        = element_text(size = 12),
-    axis.title.x       = element_text(size = 12),
-    axis.title.y       = element_text(size = 12),
-    legend.position    = "right",
-    legend.text        = element_text(size = 12)
-  )
-
-round_1_dist_plotly <- plotly::ggplotly(round_1_dist_plot, width = 800, height = 700)
-```
-
-```{r, echo=FALSE}
-round_1_dist_plotly
-```
-
-#### Round 1 Delphi Survey Results Table
-
-Decision Rule Based on Experts' Consensus and Content Validity Ratio (CVR):\
-- 75% or more of experts agree (Rating ≥ 4) & CVR \>= 0.60 → Retain\
-- 70% or more of experts agree (Rating ≥ 4) & CVR \>= 0.60 → Consider\
-- 75% or more of experts agree (Rating ≥ 4) & CVR \< 0.60 → Consider\
-- Otherwise → Revise/Remove
-
-```{r, eval=FALSE}
 round_1_results <- delphi_long %>%
   group_by(Question) %>%
   summarise(
@@ -715,7 +684,7 @@ round_1_results <- delphi_long %>%
     )
   )
 
-# openxlsx::write.xlsx(round_1_results, "results/round_1_results.xlsx", row.names = FALSE)
+# openxlsx::write.xlsx(round_1_results, "results/round_1_results.xlsx", rowNames = FALSE)
 
 round_1_results_label <- read_excel("results/round_1_results_label.xlsx")
 ```
@@ -818,6 +787,68 @@ round_1_plotly <- plotly::ggplotly(round_1_plot, width = 800, height = 700, tool
 
 ```{r, echo=FALSE}
 round_1_plotly
+```
+
+#### Round 1 Response Distribution by Question
+
+```{r}
+round_1_dist <- delphi_long %>%
+  mutate(Response_Label = case_when(
+    Rating == 1 ~ "Strongly Disagree",
+    Rating == 2 ~ "Disagree", 
+    Rating == 3 ~ "Neutral",
+    Rating == 4 ~ "Agree",
+    Rating == 5 ~ "Strongly Agree"
+  )) %>%
+  count(Question, Response_Label) %>%
+  group_by(Question) %>%
+  mutate(
+    Percentage = round(n / sum(n) * 100, 1),
+    Rating_Count = ifelse(Response_Label == "Strongly Agree", n, 0),
+    Max_Rating = max(Rating_Count)
+  )
+
+round_1_dist <- round_1_dist %>%
+  mutate(Response_Label = factor(Response_Label, levels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")))
+
+round_1_dist <- round_1_dist %>%
+  left_join(
+    round_1_results %>% select(Question, Percent_Agreement),
+    by = "Question"
+  )
+
+round_1_dist_plot <- ggplot(
+    round_1_dist,
+    aes(x = reorder(Question, Percent_Agreement), y = n, fill = Response_Label)
+  ) +
+  geom_col(position = "stack") +
+  coord_flip() +
+  labs(
+    title = "Distribution of Responses by Question",
+    x = "Question", 
+    y = "Number of Responses",
+    fill = "Rating"
+  ) +
+  scale_fill_brewer(type = "div", palette = "RdYlGn") +
+  guides(fill = guide_legend(reverse = FALSE)) + 
+  theme_minimal(base_size = 12) +
+  theme(
+    panel.grid.minor   = element_blank(),
+    panel.grid.major.x = element_line(color = "gray90"),
+    panel.grid.major.y = element_line(color = "gray90"),
+    axis.text.x        = element_text(size = 12),
+    axis.text.y        = element_text(size = 12),
+    axis.title.x       = element_text(size = 12),
+    axis.title.y       = element_text(size = 12),
+    legend.position    = "right",
+    legend.text        = element_text(size = 12)
+  )
+
+round_1_dist_plotly <- plotly::ggplotly(round_1_dist_plot, width = 800, height = 700)
+```
+
+```{r, echo=FALSE}
+round_1_dist_plotly
 ```
 
 #### Round 2 Delphi Survey Item Generation Based on Round 1 Open-Ended Responses
@@ -973,8 +1004,413 @@ policy_survey_items_round_1_td %>%
     )
 ```
 
-```{r, echo=FALSE, eval=FALSE}
-save(dfm, word_frequency_plot, word_frequency_remove_stopwords, word_frequency_remove_common,
+
+## Final Decision Making
+
+#### Round 2 Delphi Survey Results Table
+
+Decision Rule Based on Experts' Consensus and Content Validity Ratio (CVR):\
+- 75% or more of experts agree (Rating ≥ 4) & CVR \>= 0.60 → Retain\
+- 70% or more of experts agree (Rating ≥ 4) & CVR \>= 0.60 → Consider\
+- 75% or more of experts agree (Rating ≥ 4) & CVR \< 0.60 → Consider\
+- Otherwise → Revise/Remove
+
+```{r}
+delphiSecond <- read_excel("data/delphiSecond.xlsx")
+
+likert <- c(
+  "Strongly Disagree" = 1,
+  "Disagree" = 2,
+  "Neutral" = 3,
+  "Agree" = 4,
+  "Strongly Agree" = 5
+)
+
+question_levels <- sort(as.numeric(gsub("Q", "", unique(delphiSecond %>% 
+  select(matches("^Q[0-9]+$")) %>% 
+  names()))))
+
+question_levels <- paste0("Q", question_levels)
+
+delphi_long_2 <- delphiSecond %>%
+  pivot_longer(
+    cols = -c(
+      ID,
+      starts_with("Q15_"),        
+      "Q16"                       
+    ),   
+    names_to = "Question",
+    values_to = "Rating"
+  ) %>%
+  mutate(
+    Rating = likert[Rating],
+    Question = factor(Question, levels = question_levels)
+  )
+
+round_2_results <- delphi_long_2 %>%
+  group_by(Question) %>%
+  summarise(
+    Total = n(),
+    Strongly_Disagree = sum(Rating == 1),
+    Disagree = sum(Rating == 2),
+    Neutral = sum(Rating == 3),
+    Agree = sum(Rating == 4),
+    Strongly_Agree = sum(Rating == 5),
+    Agreement_Count = sum(Rating >= 4),
+    Percent_Agreement = round((Agreement_Count / Total) * 100, 1),
+    Mean = round(mean(Rating), 2),
+    SD = round(sd(Rating), 2),
+    Essential = sum(Rating >= 4),
+    CVR = round((Essential - (Total / 2)) / (Total / 2), 3),
+    IQR = IQR(Rating),
+    Consensus_Decision = case_when(
+      Percent_Agreement >= 75 ~ "Retain",
+      Percent_Agreement >= 70 ~ "Consider",
+      TRUE ~ "Revise/Remove"
+    ),
+    CVR_Decision = ifelse(CVR >= 0.60, "Retain", "Revise/Remove"),
+    Final_Decision = case_when(
+      Percent_Agreement >= 75 & CVR >= 0.60 ~ "Retain",
+      Percent_Agreement >= 70 & CVR >= 0.60 ~ "Consider",
+      Percent_Agreement >= 75 & CVR < 0.60 ~ "Consider",
+      TRUE ~ "Revise/Remove"
+    ),
+    .groups = 'drop'
+  ) %>%
+  ungroup() %>%
+  mutate(
+    Question = factor(
+      Question,
+      levels = Question[order(as.numeric(gsub("Q", "", Question)))]
+    )
+  )
+
+openxlsx::write.xlsx(round_2_results, "results/round_2_results.xlsx", rowNames = FALSE)
+
+round_2_results_label <- read_excel("results/round_2_results_label.xlsx")
+```
+
+
+
+```{r, echo=FALSE}
+round_2_results_label %>%
+    dplyr::select(Question, Label) %>%
+      DT::datatable(
+    options = list(
+      dom = 'Bfrtip',
+      buttons = c('copy', 'csv', 'excel', 'pdf'),
+      pageLength = 10,
+      scrollX = TRUE
+    ),
+    extensions = 'Buttons',
+    class = "cell-border stripe",
+    rownames = FALSE
+  )
+```
+
+```{r, echo=FALSE}
+round_2_results %>%
+  mutate(across(where(is.numeric), ~ round(., 2))) %>%
+  DT::datatable(
+    options = list(
+      dom = 'Bfrtip',
+      buttons = c('copy', 'csv', 'excel', 'pdf'),
+      pageLength = 10,
+      scrollX = TRUE
+    ),
+    extensions = 'Buttons',
+    class = "cell-border stripe",
+    rownames = FALSE
+  )
+```
+
+#### Round 2 Delphi Survey Results Plot
+
+```{r}
+round_2_results <- round_2_results %>%
+  mutate(Final_Decision = factor(Final_Decision, levels = c("Retain", "Consider", "Revise/Remove")))
+
+round_2_results <- round_2_results %>%
+  mutate(
+    tooltip_label = paste0(
+      "Agreement: ", Percent_Agreement, "%\n",
+      "CVR: ", round(CVR, 2), "\n",
+      "Final Decision: ", Final_Decision
+    )
+  )
+
+round_2_plot <- ggplot(round_2_results, aes(
+  x = reorder(Question, Percent_Agreement),
+  y = Percent_Agreement,
+  fill = Final_Decision,
+  text = tooltip_label
+)) +
+  geom_col() +
+  geom_hline(yintercept = 75, linetype = "dashed", color = "blue") +
+  coord_flip() +
+  labs(
+    title = "",
+    subtitle = "",
+    x = "Question",
+    y = "Percent Agreement",
+    fill = "Final Decision"
+  ) +
+  scale_fill_manual(values = c(
+    "Retain" = "darkgreen",
+    "Consider" = "#6B8E23",
+    "Revise/Remove" = "orange"
+  )) +
+  theme_minimal(base_size = 12) +
+  theme(
+    axis.text.x      = element_text(size = 12),
+    axis.text.y      = element_text(size = 12),
+    axis.title.x     = element_text(size = 12),
+    axis.title.y     = element_text(size = 12),
+    legend.position  = "right",
+    legend.text      = element_text(size = 12)
+  )
+
+round_2_plotly <- plotly::ggplotly(round_2_plot, width = 800, height = 700, tooltip = "text") %>%
+  plotly::layout(
+    annotations = list(
+      list(
+        x = 0,
+        y = -0.16,
+        text = "Blue line = 75% agreement threshold (Delphi consensus)",
+        showarrow = FALSE,
+        xref = "paper",
+        yref = "paper",
+        font = list(size = 16, color = "gray40")
+      )
+    ),
+    margin = list(b = 100, t = 40, l = 40)
+  )
+
+```
+
+```{r, echo=FALSE}
+round_2_plotly
+```
+
+#### Round 2 Response Distribution by Question
+
+```{r}
+round_2_dist <- delphi_long_2 %>%
+  mutate(Response_Label = case_when(
+    Rating == 1 ~ "Strongly Disagree",
+    Rating == 2 ~ "Disagree", 
+    Rating == 3 ~ "Neutral",
+    Rating == 4 ~ "Agree",
+    Rating == 5 ~ "Strongly Agree"
+  )) %>%
+  count(Question, Response_Label) %>%
+  group_by(Question) %>%
+  mutate(
+    Percentage = round(n / sum(n) * 100, 1),
+    Rating_Count = ifelse(Response_Label == "Strongly Agree", n, 0),
+    Max_Rating = max(Rating_Count)
+  )
+
+round_2_dist <- round_2_dist %>%
+  mutate(Response_Label = factor(Response_Label, levels = c("Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree")))
+
+round_2_dist <- round_2_dist %>%
+  left_join(
+    round_2_results %>% select(Question, Percent_Agreement),
+    by = "Question"
+  )
+
+round_2_dist_plot <- ggplot(
+    round_2_dist,
+    aes(x = reorder(Question, Percent_Agreement), y = n, fill = Response_Label)
+  ) +
+  geom_col(position = "stack") +
+  coord_flip() +
+  labs(
+    title = "Distribution of Responses by Question",
+    x = "Question", 
+    y = "Number of Responses",
+    fill = "Rating"
+  ) +
+  scale_fill_brewer(type = "div", palette = "RdYlGn") +
+  guides(fill = guide_legend(reverse = FALSE)) + 
+  theme_minimal(base_size = 12) +
+  theme(
+    panel.grid.minor   = element_blank(),
+    panel.grid.major.x = element_line(color = "gray90"),
+    panel.grid.major.y = element_line(color = "gray90"),
+    axis.text.x        = element_text(size = 12),
+    axis.text.y        = element_text(size = 12),
+    axis.title.x       = element_text(size = 12),
+    axis.title.y       = element_text(size = 12),
+    legend.position    = "right",
+    legend.text        = element_text(size = 12)
+  )
+
+round_2_dist_plotly <- plotly::ggplotly(round_2_dist_plot, width = 800, height = 700)
+```
+
+```{r, echo=FALSE}
+round_2_dist_plotly
+```
+
+
+#### Final Decision Making Item Generation Based on Round 2 Open-Ended Responses
+
+```{r}
+united_tbl_2 <- unite_text_cols(delphiSecond, 
+                              listed_vars = "Q16")
+
+tokens_2 <- preprocess_texts(united_tbl_2, text_field = "united_texts", verbose = FALSE)
+
+tokens_collocations_2 <- detect_multi_word_expressions(tokens_2, size = 2:5, min_count = 2)
+
+dfm_object_2 <- dfm(tokens_2)
+
+word_frequency_plot_2 <- plot_word_frequency(dfm_object_2, n = 20)
+
+stopwords <- stopwords("en", source = "snowball")
+
+toks_removed_2 <- tokens_remove(tokens_2, pattern = stopwords, verbose = FALSE)
+
+dfm_init_2 <- dfm(toks_removed_2)
+
+word_frequency_remove_stopwords_2 <- plot_word_frequency(dfm_init_2, n = 20)
+
+common_words_2 <- c("also")
+
+toks_removed_common_2 <- tokens_remove(toks_removed_2, 
+                                     pattern = common_words_2, 
+                                     valuetype = "regex", 
+                                     verbose = FALSE)
+
+dfm_removed_2 <- dfm(toks_removed_common_2)
+
+word_frequency_remove_common_2 <- plot_word_frequency(dfm_removed_2, n = 20)
+
+texts_2 <- sapply(toks_removed_common_2, paste, collapse = " ")
+
+# parsed_2 <- spacy_parse(x = texts_2, lemma = TRUE, entity = FALSE, pos = FALSE)
+
+# toks_lemmatized_2 <- as.tokens(parsed_2, use_lemma = TRUE)
+
+dfm_2 <- dfm(tokens(texts_2))
+
+word_frequency_lemmatized_2 <- plot_word_frequency(dfm_2, n = 20)
+
+evaluate_optimal_topic_number(
+    dfm_object = dfm_2,
+    topic_range = 5:15, 
+    max.em.its = 50,    
+    categorical_var = NULL,
+    continuous_var = "",
+    height = 600,
+    width = 800,
+    verbose = TRUE)     
+```
+
+![](images/model_diagnostics_round_2.png){fig-align="center" width="700"}
+
+```{r}
+out_2 <- quanteda::convert(dfm_2, to = "stm")
+
+topic_model_round_2 <- stm(
+    data = out_2$meta,
+    documents = out_2$documents,
+    vocab = out_2$vocab,
+    max.em.its = 75,
+    init.type = "Spectral",
+    K = 10,
+    prevalence = ~ 1, 
+    verbose = FALSE,
+    seed = 1234)
+
+top_topic_terms_round_2 <- TextAnalysisR::select_top_topic_terms(
+    stm_model = topic_model_round_2,
+    top_term_n = 10,
+    verbose = FALSE
+)
+
+# top_topic_terms_round_2 %>%
+#     mutate_if(is.numeric, ~ round(., 3)) %>% 
+#     DT::datatable(
+#         options = list(
+#             dom = 'Bfrtip',
+#             buttons = c('copy', 'csv', 'excel', 'pdf'),
+#             pageLength = 10,
+#             scrollX = TRUE
+#         ),
+#         extensions = 'Buttons',
+#         class = "cell-border stripe",
+#         rownames = FALSE
+#     )
+
+top_labeled_topic_terms_round_2 <- TextAnalysisR::generate_topic_labels(
+    top_topic_terms_round_2 ,
+    model = "gpt-3.5-turbo",
+    temperature = 0.5,
+    verbose = FALSE)
+
+# openxlsx::write.xlsx(top_labeled_topic_terms_round_2, "data/top_labeled_topic_terms_round_2.xlsx")
+```
+
+```{r, echo=FALSE}
+top_labeled_topic_terms_round_2 |>
+    mutate_if(is.numeric, ~ round(., 3)) |>
+    DT::datatable(
+        rownames = FALSE,
+        extensions = 'Buttons',
+        options = list(
+            scrollX = TRUE,
+            scrollY = "400px",
+            width = "80%",
+            dom = 'Bfrtip',
+            buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
+        )
+    ) 
+```
+
+```{r}
+policy_survey_items_round_2 <- generate_survey_items(
+    top_labeled_topic_terms_round_2,
+    model = "gpt-3.5-turbo",
+    temperature = 0,
+    verbose = TRUE)
+
+policy_survey_items_round_2_td <- 
+    policy_survey_items_round_2 %>%
+    group_by(topic) %>%
+    summarise(
+        survey_item = first(survey_item),
+        term_beta = paste(term, "(", round(beta, 3), ")", collapse = ", ")
+    ) %>%
+    ungroup()
+
+openxlsx::write.xlsx(policy_survey_items_round_2_td, "data/policy_survey_items_round_2_td.xlsx")
+```
+
+```{r, echo=FALSE}
+policy_survey_items_round_2_td %>%
+    DT::datatable(
+        rownames = FALSE,
+        extensions = 'Buttons',
+        options = list(
+            scrollX = TRUE,
+            scrollY = "400px",
+            width = "80%",
+            dom = 'Bfrtip',
+            buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
+        )
+    ) %>%
+    DT::formatStyle(
+        columns = c("topic", "survey_item", "term_beta"),
+        fontSize = '16px'
+    )
+```
+
+
+```{r, echo=FALSE}
+save(delphi_long, delphi_long_2, dfm, word_frequency_plot, word_frequency_remove_stopwords, word_frequency_remove_common,
      word_frequency_lemmatized, toks_removed_common, toks_removed, toks_lemmatized,
      dfm_object, dfm_removed, dfm_init, tokens_compound, tokens_collocations,
      tokens_dict, tokens, united_tbl, data_long, 
@@ -986,5 +1422,12 @@ save(dfm, word_frequency_plot, word_frequency_remove_stopwords, word_frequency_r
      round_1_results, round_1_results_label, round_1_plot, round_1_plotly, 
      round_1_dist, round_1_dist_plot, round_1_dist_plotly, 
      topic_model_round_1, top_labeled_topic_terms_round_1 , policy_survey_items_round_1_td, 
+     round_2_results, round_2_results_label, round_2_plot, round_2_plotly, 
+     round_2_dist, round_2_dist_plot, round_2_dist_plotly,
+     dfm_2, word_frequency_plot_2, word_frequency_remove_stopwords_2,
+     word_frequency_remove_common_2, word_frequency_lemmatized_2,
+     toks_removed_common_2, toks_removed_2, 
+     dfm_object_2, dfm_removed_2, dfm_init_2, tokens_collocations_2,
+     tokens_2, united_tbl_2, top_labeled_topic_terms_round_2,
      file = "data/ai_ld_data.rda")
 ```
