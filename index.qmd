@@ -41,6 +41,8 @@ suppressPackageStartupMessages({
     library(jsonlite)
     library(progress)
     library(openxlsx)
+    library(stringr)
+    library(purrr)
 })
 ```
 
@@ -56,25 +58,99 @@ load("data/ai_ld_data.rda")
 
 ```{r, echo=FALSE}
 delphiFirst <- read_excel("data/delphiFirst.xlsx")
-
-demo_tbl <- delphiFirst %>%
-  dplyr::select(position, school_level, spanish_hispanic_latino, race, sex) %>%
-  tbl_summary(
-              percent = "column") 
-  
-demo_tbl_ft <- as_flex_table(demo_tbl)
-
-read_docx() %>%
-  body_add_flextable(demo_tbl_ft) %>%
-  print(target = "data/demo_tbl_ft.docx")
 ```
 
-```{r}
-demo_tbl_ft
+#### single Choice Variables
+
+```{r, eval=FALSE}
+# Total experts N = 17
+single_tbl <- delphiFirst %>%
+  select(spanish_hispanic_latino, sex) %>%
+  pivot_longer(everything(), names_to = "Variable", values_to = "Choice") %>%
+  count(Variable, Choice) %>%
+  mutate(
+    Percent = round(n / nrow(delphiFirst) * 100, 1),
+    `N (%)` = paste0(n, " (", Percent, "%)"),
+    Variable = case_when(
+      Variable == "spanish_hispanic_latino" ~ "Spanish/Hispanic/Latino",
+      Variable == "sex" ~ "Sex",
+      TRUE ~ Variable
+    )
+  ) %>%
+  select(Variable, Choice, `N (%)`)
+
+# openxlsx::write.xlsx(single_tbl, "data/single_tbl.xlsx")
+```
+
+```{r, echo=FALSE}
+single_tbl_ft <- read_excel("data/single_tbl_ft.xlsx")
+
+single_tbl_ft %>%
+  DT::datatable(
+    options = list(
+      dom = 'Bfrtip',
+      buttons = c('copy', 'csv', 'excel', 'pdf'),
+      pageLength = 10,
+      scrollX = TRUE
+    ),
+    extensions = 'Buttons',
+    class = "cell-border stripe",
+    rownames = FALSE
+  )
+```
+
+#### Multiple Choice Variables 
+
+```{r, eval=FALSE}
+# Total experts N = 17
+total_n <- nrow(delphiFirst)
+
+summarize_multichoice <- function(data, var, var_label) {
+  data %>%
+    pull({{ var }}) %>%
+    str_split(",\\s*") %>%
+    unlist() %>%
+    str_trim() %>%
+    table() %>%
+    sort(decreasing = TRUE) %>%
+    as.data.frame() %>%
+    rename(Choice = ".", Count = "Freq") %>%
+    mutate(
+      Percent = round(Count / total_n * 100, 1),
+      `N (%)` = paste0(Count, " (", Percent, "%)"),
+      Variable = var_label
+    ) %>%
+    select(Variable, Choice, `N (%)`)
+}
+
+position_tbl <- summarize_multichoice(delphiFirst, position, "Position")
+school_tbl   <- summarize_multichoice(delphiFirst, school_level, "School Level") 
+race_tbl     <- summarize_multichoice(delphiFirst, race, "Race")
+
+multi_tbl <- bind_rows(position_tbl, school_tbl, race_tbl)
+
+# openxlsx::write.xlsx(multi_tbl, "data/multi_tbl.xlsx")
 ```
 
 
-## Round 1 Delphi Survey
+```{r, echo=FALSE}
+multi_tbl_ft <- read_excel("data/multi_tbl_ft.xlsx")
+
+multi_tbl_ft %>%
+  DT::datatable(
+    options = list(
+      dom = 'Bfrtip',
+      buttons = c('copy', 'csv', 'excel', 'pdf'),
+      pageLength = 10,
+      scrollX = TRUE
+    ),
+    extensions = 'Buttons',
+    class = "cell-border stripe",
+    rownames = FALSE
+  )
+```
+
+## Development - R1 Survey
 
 #### Preporcess Text Data
 
@@ -603,7 +679,7 @@ policy_survey_items_dist %>%
 openxlsx::write.xlsx(policy_survey_items_dist, "data/policy_survey_items.xlsx")
 ```
 
-## Round 2 Delphi Survey
+## Analysis - R1 Survey
 
 #### Round 1 Delphi Survey Results Table
 
@@ -707,6 +783,7 @@ round_1_results_label %>%
 
 ```{r, echo=FALSE}
 round_1_results %>%
+    select(-tooltip_label) %>%
     mutate(across(where(is.numeric), ~ round(., 2))) %>%
     DT::datatable(
         options = list(
@@ -850,6 +927,8 @@ round_1_dist_plotly <- plotly::ggplotly(round_1_dist_plot, width = 800, height =
 ```{r, echo=FALSE}
 round_1_dist_plotly
 ```
+
+## Development - R2 Survey
 
 #### Round 2 Delphi Survey Item Generation Based on Round 1 Open-Ended Responses
 
@@ -1004,8 +1083,7 @@ policy_survey_items_round_1_td %>%
     )
 ```
 
-
-## Final Decision Making
+## Analysis - R2 Survey
 
 #### Round 2 Delphi Survey Results Table
 
@@ -1409,7 +1487,8 @@ policy_survey_items_round_2_td %>%
 
 
 ```{r, echo=FALSE}
-save(delphi_long, delphi_long_2, dfm, word_frequency_plot, word_frequency_remove_stopwords, word_frequency_remove_common,
+save(single_tbl_ft, multi_tbl_ft,
+     delphi_long, delphi_long_2, dfm, word_frequency_plot, word_frequency_remove_stopwords, word_frequency_remove_common,
      word_frequency_lemmatized, toks_removed_common, toks_removed, toks_lemmatized,
      dfm_object, dfm_removed, dfm_init, tokens_compound, tokens_collocations,
      tokens_dict, tokens, united_tbl, data_long, 
