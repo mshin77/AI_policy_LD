@@ -707,18 +707,18 @@ round_1_results_label %>%
 
 ```{r, echo=FALSE}
 round_1_results %>%
-    mutate(across(where(is.numeric), ~ round(., 2))) %>%
-    DT::datatable(
-        options = list(
-            dom = 'Bfrtip',
-            buttons = c('copy', 'csv', 'excel', 'pdf'),
-            pageLength = 10,
-            scrollX = TRUE
-        ),
-        extensions = 'Buttons',
-        class = "cell-border stripe",
-        rownames = FALSE
-    )
+  mutate(across(where(is.numeric), ~ round(., 2))) %>%
+  DT::datatable(
+    options = list(
+      dom = 'Bfrtip',
+      buttons = c('copy', 'csv', 'excel', 'pdf'),
+      pageLength = 10,
+      scrollX = TRUE
+    ),
+    extensions = 'Buttons',
+    class = "cell-border stripe",
+    rownames = FALSE
+  )
 ```
 
 #### Round 1 Delphi Survey Results Plot
@@ -754,7 +754,7 @@ round_1_plot <- ggplot(round_1_results, aes(
   ) +
   scale_fill_manual(values = c(
     "Retain" = "darkgreen",
-    "Consider" = "#568203",
+    "Consider" = "#6B8E23",
     "Revise/Remove" = "orange"
   )) +
   theme_minimal(base_size = 12) +
@@ -1087,8 +1087,10 @@ round_2_results <- delphi_long_2 %>%
 
 openxlsx::write.xlsx(round_2_results, "results/round_2_results.xlsx", rowNames = FALSE)
 
-# round_2_results_label <- read_excel("results/round_2_results_label.xlsx")
+round_2_results_label <- read_excel("results/round_2_results_label.xlsx")
 ```
+
+
 
 ```{r, echo=FALSE}
 round_2_results_label %>%
@@ -1108,18 +1110,17 @@ round_2_results_label %>%
 
 ```{r, echo=FALSE}
 round_2_results %>%
-    select(-tooltip_label) %>%
-    mutate(across(where(is.numeric), ~ round(., 2))) %>%
-    DT::datatable(
-        options = list(
-            dom = 'Bfrtip',
-            buttons = c('copy', 'csv', 'excel', 'pdf'),
-            pageLength = 10,
-            scrollX = TRUE
-        ),
-        extensions = 'Buttons',
-        class = "cell-border stripe",
-        rownames = FALSE
+  mutate(across(where(is.numeric), ~ round(., 2))) %>%
+  DT::datatable(
+    options = list(
+      dom = 'Bfrtip',
+      buttons = c('copy', 'csv', 'excel', 'pdf'),
+      pageLength = 10,
+      scrollX = TRUE
+    ),
+    extensions = 'Buttons',
+    class = "cell-border stripe",
+    rownames = FALSE
   )
 ```
 
@@ -1156,7 +1157,7 @@ round_2_plot <- ggplot(round_2_results, aes(
   ) +
   scale_fill_manual(values = c(
     "Retain" = "darkgreen",
-    "Consider" = "#568203",
+    "Consider" = "#6B8E23",
     "Revise/Remove" = "orange"
   )) +
   theme_minimal(base_size = 12) +
@@ -1289,11 +1290,11 @@ word_frequency_remove_common_2 <- plot_word_frequency(dfm_removed_2, n = 20)
 
 texts_2 <- sapply(toks_removed_common_2, paste, collapse = " ")
 
-parsed_2 <- spacy_parse(x = texts_2, lemma = TRUE, entity = FALSE, pos = FALSE)
+# parsed_2 <- spacy_parse(x = texts_2, lemma = TRUE, entity = FALSE, pos = FALSE)
 
-toks_lemmatized_2 <- as.tokens(parsed_2, use_lemma = TRUE)
+# toks_lemmatized_2 <- as.tokens(parsed_2, use_lemma = TRUE)
 
-dfm_2 <- dfm(tokens(toks_lemmatized_2))
+dfm_2 <- dfm(tokens(texts_2))
 
 word_frequency_lemmatized_2 <- plot_word_frequency(dfm_2, n = 20)
 
@@ -1305,7 +1306,7 @@ evaluate_optimal_topic_number(
     continuous_var = "",
     height = 600,
     width = 800,
-    verbose = FALSE)     
+    verbose = TRUE)     
 ```
 
 ![](images/model_diagnostics_round_2.png){fig-align="center" width="700"}
@@ -1428,6 +1429,5 @@ save(delphi_long, delphi_long_2, dfm, word_frequency_plot, word_frequency_remove
      toks_removed_common_2, toks_removed_2, 
      dfm_object_2, dfm_removed_2, dfm_init_2, tokens_collocations_2,
      tokens_2, united_tbl_2, top_labeled_topic_terms_round_2,
-     policy_survey_items_round_2_td,
      file = "data/ai_ld_data.rda")
 ```
