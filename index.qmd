@@ -49,12 +49,13 @@ suppressPackageStartupMessages({
     library(purrr)
     library(text2vec)
     library(stringdist)
+    library(DT)
 })
 
-sentence_transformers <- import("sentence_transformers")
-sentence_model <- sentence_transformers$SentenceTransformer("all-MiniLM-L6-v2")
+# sentence_transformers <- import("sentence_transformers")
+# sentence_model <- sentence_transformers$SentenceTransformer("all-MiniLM-L6-v2")
 
-stopwords <- stopwords("en", source = "snowball")
+# stopwords <- stopwords("en", source = "snowball")
 ```
 
 #### Load Dataset
@@ -67,7 +68,7 @@ load("data/ai_ld_data.rda")
 
 ## Policy Document Analysis
 
-#### Document Semantic Similarity
+### Document-Level Analysis
 
 ```{r, eval=FALSE}
 data <- read_excel("data/policyData.xlsx")
@@ -88,179 +89,142 @@ data_long <- data |>
 united_tbl <- unite_text_cols(data_long, 
                               listed_vars = "coding_text")
 
-calculate_doc_embedding_similarity <- function(data_long, sentence_model, similarity_threshold = 0.6) {
-  
-  cat("Preparing document-level analysis with proper names...\n")
-  
-  documents <- data_long %>%
-    group_by(ID, doc_name, disability, SLD) %>%
+documents <- data_long %>%
+    group_by(ID, doc_name, type, disability, SLD) %>%
     summarise(
-      document_text = paste(coding_text, collapse = " "),
-      n_chunks = n(),
-      .groups = 'drop'
+        document_text = paste(coding_text, collapse = " "),
+        n_chunks = n(),
+        .groups = 'drop'
     ) %>%
     mutate(
-      category = case_when(
-        disability == "Yes" & SLD == "Yes" ~ "SLD",
-        disability == "Yes" & SLD == "No" ~ "Other Disability", 
-        disability == "No" & SLD == "No" ~ "General",
-        TRUE ~ "Uncategorized"
-      ),
-      display_name = paste("Doc", ID)  
-    )
-  
-  cat("Document lengths:\n")
-  print(documents %>% mutate(text_length = nchar(document_text)) %>% select(display_name, text_length, category))
-  
-  documents_filtered <- documents %>%
-    arrange(category, display_name)
-  
-  cat("Documents data frame rows (using all documents):", nrow(documents_filtered), "\n")
-  
-  if(nrow(documents_filtered) == 0) {
-    stop("No documents remain after filtering! Check document lengths and categories.")
-  }
-  
-  cat("\n=== DOCUMENTS FOR ANALYSIS ===\n")
-  documents_summary <- documents_filtered %>%
-    mutate(text_length = nchar(document_text)) %>%
-    select(display_name, category, n_chunks, text_length) %>%
-    mutate(text_length = paste(text_length, "chars"))
-  
-  print(documents_summary)
-  
-  cat("\nDocuments by category:\n")
-  print(table(documents_filtered$category))
-  
-  embeddings <- list()
-  
-  for(cat in unique(documents_filtered$category)) {
-    cat_docs <- documents_filtered %>% filter(category == cat)
-    cat("\nEmbedding", nrow(cat_docs), cat, "documents:\n")
-    
-    for(i in 1:nrow(cat_docs)) {
-      cat("-", cat_docs$display_name[i], "\n")
-    }
-    
-    emb <- sentence_model$encode(cat_docs$document_text, convert_to_tensor = FALSE)
-    embeddings[[cat]] <- list(
-      embeddings = reticulate::py_to_r(emb),
-      texts = cat_docs$document_text,
-      doc_names = cat_docs$display_name,  
-      doc_ids = cat_docs$ID,
-      actual_names = cat_docs$doc_name
-    )
-  }
-  
-  other_categories <- names(embeddings)[names(embeddings) != "SLD"]
-  
-  ld_similarities <- map_dfr(other_categories, function(other_cat) {
-    
-    ld_emb <- embeddings$SLD$embeddings
-    other_emb <- embeddings[[other_cat]]$embeddings
-    
-    expand_grid(
-      ld_doc = 1:nrow(ld_emb), 
-      other_doc = 1:nrow(other_emb)
+        category = case_when(
+            disability == "Yes" & SLD == "Yes" ~ "SLD",
+            disability == "Yes" & SLD == "No" ~ "Other Disability", 
+            disability == "No" & SLD == "No" ~ "General",
+            TRUE ~ "Uncategorized"
+        ),
+        display_name = paste("Doc", ID),
+        doc_numeric_id = as.numeric(str_extract(display_name, "\\d+"))
     ) %>%
-      mutate(
-        cosine_similarity = map2_dbl(ld_doc, other_doc, function(i, j) {
-          vec1 <- ld_emb[i, ]
-          vec2 <- other_emb[j, ]
-          sum(vec1 * vec2) / (sqrt(sum(vec1^2)) * sqrt(sum(vec2^2)))
-        }),
-        ld_doc_name = embeddings$SLD$doc_names[ld_doc],
-        other_doc_name = embeddings[[other_cat]]$doc_names[other_doc],
-        ld_doc_id = embeddings$SLD$doc_ids[ld_doc],
-        other_doc_id = embeddings[[other_cat]]$doc_ids[other_doc],
-        ld_actual_name = embeddings$SLD$actual_names[ld_doc],
-        other_actual_name = embeddings[[other_cat]]$actual_names[other_doc],
-        ld_text_preview = substr(embeddings$SLD$texts[ld_doc], 1, 150),
-        other_text_preview = substr(embeddings[[other_cat]]$texts[other_doc], 1, 150),
-        other_category = other_cat
-      )
-  })
-  
-  LD_Unique <- ld_similarities %>%
-      group_by(ld_doc_name, ld_text_preview) %>%
-      summarise(
-          max_similarity = max(cosine_similarity),
-          most_similar_doc = other_doc_name[which.max(cosine_similarity)],
-          most_similar_category = other_category[which.max(cosine_similarity)],
-          .groups = 'drop'
-      ) %>%
-      filter(max_similarity < similarity_threshold) %>%
-      mutate(
-          doc_numeric_id = as.numeric(str_extract(ld_doc_name, "\\d+"))
-      ) %>%
-      arrange(doc_numeric_id) %>%
-      mutate(gap_type = "LD_Unique")
-  
-  missing_from_ld <- ld_similarities %>%
-      group_by(other_doc_name, other_text_preview, other_category) %>%
-      summarise(
-          max_ld_similarity = max(cosine_similarity),
-          most_similar_ld_doc = ld_doc_name[which.max(cosine_similarity)],
-          .groups = 'drop'
-      ) %>%
-      filter(max_ld_similarity < similarity_threshold) %>%
-      mutate(
-          doc_numeric_id = as.numeric(str_extract(other_doc_name, "\\d+"))
-      ) %>%
-      arrange(doc_numeric_id) %>%
-      mutate(gap_type = "Missing_from_SLD")
-  
-  policy_integration <- ld_similarities %>%
-      group_by(ld_doc_name, ld_text_preview) %>%
-      summarise(
-          max_similarity = max(cosine_similarity),
-          best_match_doc = other_doc_name[which.max(cosine_similarity)],
-          best_match_category = other_category[which.max(cosine_similarity)],
-          .groups = 'drop'
-      ) %>%
-      filter(max_similarity >= similarity_threshold & max_similarity < 0.8) %>%
-      mutate(
-          doc_numeric_id = as.numeric(str_extract(ld_doc_name, "\\d+"))
-      ) %>%
-      arrange(doc_numeric_id) %>%
-      mutate(gap_type = "Integration_Opportunity")
-  
-  stats <- ld_similarities %>%
-      group_by(other_category) %>%
-      summarise(
-          mean_similarity = round(mean(cosine_similarity), 3),
-          median_similarity = round(median(cosine_similarity), 3),
-          sd_similarity = round(sd(cosine_similarity), 3),
-          min_similarity = round(min(cosine_similarity), 3),
-          max_similarity = round(max(cosine_similarity), 3),
-          .groups = 'drop'
-      )
-  
-  return(list(
-      documents_info = documents_filtered,
-      all_similarities = ld_similarities,
-      LD_Unique = LD_Unique,
-      missing_from_ld = missing_from_ld,
-      policy_integration = policy_integration,
-      stats = stats,
-      embeddings_info = map(embeddings, ~list(
-          n_docs = nrow(.x$embeddings), 
-          n_dims = ncol(.x$embeddings),
-          doc_names = .x$doc_names
-      ))
-  ))
+    arrange(doc_numeric_id)
+
+documents_filtered <- documents %>%
+    mutate(
+        doc_numeric_id = as.numeric(str_extract(display_name, "\\d+"))
+    ) %>%
+    arrange(doc_numeric_id)
+
+if(nrow(documents_filtered) == 0) {
+    stop("No documents remain after filtering! Check document lengths and categories.")
 }
 
-doc_embedding_similarity <- calculate_doc_embedding_similarity(data_long, sentence_model, similarity_threshold = 0.6)
+document_summary <- documents_filtered %>%
+    select(
+        Document = display_name,
+        `Document Name` = doc_name,
+        Type = type,
+        Disability = disability,
+        SLD = SLD,
+        Category = category,
+        `Coding Units` = n_chunks
+    )
+```
 
-doc_embedding_similarity_stats <- doc_embedding_similarity$stats
-doc_embedding_similarity_LD_Unique <- doc_embedding_similarity$LD_Unique
-doc_embedding_similarity_missing_from_ld <- doc_embedding_similarity$missing_from_ld
-doc_embedding_similarity_policy_integration <- doc_embedding_similarity$policy_integration
+
+```{r, echo=FALSE}
+document_summary %>%
+        DT::datatable(
+        options = list(
+            dom = 'Bfrtip',
+            buttons = c('copy', 'excel', 'pdf'),
+            pageLength = 10,
+            scrollX = TRUE
+        ),
+        extensions = 'Buttons',
+        class = "cell-border stripe",
+        rownames = FALSE
+    )
+```
+
+
+```{r, eval=FALSE}
+documents <- data_long %>%
+  group_by(ID, doc_name, type, disability, SLD) %>%
+  summarise(
+    document_text = paste(coding_text, collapse = " "),
+    n_chunks = n(),
+    .groups = 'drop'
+  ) %>%
+  mutate(
+    category = case_when(
+      disability == "Yes" & SLD == "Yes" ~ "SLD",
+      disability == "Yes" & SLD == "No" ~ "Other Disability", 
+      disability == "No" & SLD == "No" ~ "General",
+      TRUE ~ "Uncategorized"
+    ),
+    display_name = paste("Doc", ID),
+    doc_numeric_id = as.numeric(str_extract(display_name, "\\d+"))
+  ) %>%
+  arrange(doc_numeric_id)
+
+if(nrow(documents) == 0) {
+  stop("No documents remain after filtering! Check document lengths and categories.")
+}
+
+embeddings <- list()
+
+for(cat in unique(documents$category)) {
+  cat_docs <- documents %>% filter(category == cat)
+  cat("\nEmbedding", nrow(cat_docs), cat, "documents:\n")
+  
+  for(i in 1:nrow(cat_docs)) {
+    cat("-", cat_docs$display_name[i], "\n")
+  }
+  
+  emb <- sentence_model$encode(cat_docs$document_text, convert_to_tensor = FALSE)
+  embeddings[[cat]] <- list(
+    embeddings = reticulate::py_to_r(emb),
+    texts = cat_docs$document_text,
+    doc_names = cat_docs$display_name,  
+    doc_ids = cat_docs$ID,
+    actual_names = cat_docs$doc_name
+  )
+}
+
+other_categories <- names(embeddings)[names(embeddings) != "SLD"]
+similarity_threshold <- 0.6
+
+ld_similarities <- map_dfr(other_categories, function(other_cat) {
+  
+  ld_emb <- embeddings$SLD$embeddings
+  other_emb <- embeddings[[other_cat]]$embeddings
+  
+  expand_grid(
+    ld_doc = 1:nrow(ld_emb), 
+    other_doc = 1:nrow(other_emb)
+  ) %>%
+    mutate(
+      cosine_similarity = map2_dbl(ld_doc, other_doc, function(i, j) {
+        vec1 <- ld_emb[i, ]
+        vec2 <- other_emb[j, ]
+        sum(vec1 * vec2) / (sqrt(sum(vec1^2)) * sqrt(sum(vec2^2)))
+      }),
+      ld_doc_name = embeddings$SLD$doc_names[ld_doc],
+      other_doc_name = embeddings[[other_cat]]$doc_names[other_doc],
+      ld_doc_id = embeddings$SLD$doc_ids[ld_doc],
+      other_doc_id = embeddings[[other_cat]]$doc_ids[other_doc],
+      ld_actual_name = embeddings$SLD$actual_names[ld_doc],
+      other_actual_name = embeddings[[other_cat]]$actual_names[other_doc],
+      other_category = other_cat
+    )
+}) %>%
+  mutate(
+    other_category = factor(other_category, levels = c("Other Disability", "General"))
+  )
 
 create_document_heatmap <- function(similarities, title_suffix = "") {
   
-  documents_info <- doc_embedding_similarity$documents_info
+  documents_info <- documents_filtered
   
   plot_data <- similarities %>%
     mutate(
@@ -288,6 +252,7 @@ create_document_heatmap <- function(similarities, title_suffix = "") {
     mutate(
       ld_label = factor(ld_label, levels = rev(ld_order)),  
       other_label = factor(other_label, levels = other_order),
+      other_category = factor(other_category, levels = c("Other Disability", "General")),
       tooltip_text = paste0(
         "SLD: ", coalesce(ld_actual_name, ld_doc_name),
         "<br>", other_category, ": ", coalesce(other_actual_name, other_doc_name),
@@ -317,7 +282,7 @@ create_document_heatmap <- function(similarities, title_suffix = "") {
     ) + labs(y = "SLD Documents")
 }
 
-similarity_heatmap <- create_document_heatmap(doc_embedding_similarity$all_similarities, "SLD Focus")
+similarity_heatmap <- create_document_heatmap(ld_similarities, "SLD Focus")
 
 similarity_heatmap_plotly <- similarity_heatmap %>% 
   ggplotly(tooltip = "text", width = 800, height = 500) %>% 
@@ -331,8 +296,76 @@ similarity_heatmap_plotly
 
 #### Document Embedding Similarity Statistics Table
 
-```{r}
-doc_embedding_similarity_stats %>% 
+```{r, eval=FALSE}
+similarity_stats <- ld_similarities %>%
+    group_by(other_category) %>%
+    summarise(
+        mean_similarity = round(mean(cosine_similarity), 3),
+        median_similarity = round(median(cosine_similarity), 3),
+        sd_similarity = round(sd(cosine_similarity), 3),
+        min_similarity = round(min(cosine_similarity), 3),
+        max_similarity = round(max(cosine_similarity), 3),
+        .groups = 'drop'
+    )
+
+LD_Unique <- ld_similarities %>%
+    group_by(ld_doc_name) %>%
+    summarise(
+        max_similarity = max(cosine_similarity),
+        min_similarity = min(cosine_similarity),
+        max_idx = which.max(cosine_similarity),
+        match_doc = other_doc_name[max_idx],
+        match_cat = other_category[max_idx],
+        .groups = 'drop'
+    ) %>%
+    select(-max_idx) %>%
+    filter(max_similarity < similarity_threshold) %>%
+    mutate(
+        doc_numeric_id = as.numeric(str_extract(ld_doc_name, "\\d+"))
+    ) %>%
+    arrange(doc_numeric_id) %>%
+    mutate(gap_type = "LD_Unique")
+
+missing_from_ld <- ld_similarities %>%
+    group_by(other_doc_name, other_category) %>%
+    summarise(
+        max_similarity = max(cosine_similarity),
+        min_similarity = min(cosine_similarity),
+        max_idx = which.max(cosine_similarity),
+        match_sld = ld_doc_name[max_idx],
+        .groups = 'drop'
+    ) %>%
+    select(-max_idx) %>%
+    filter(max_similarity < similarity_threshold) %>%
+    mutate(
+        doc_numeric_id = as.numeric(str_extract(other_doc_name, "\\d+"))
+    ) %>%
+    arrange(doc_numeric_id) %>%
+    mutate(gap_type = "Missing_from_SLD")
+
+cross_policy <- ld_similarities %>%
+    group_by(ld_doc_name) %>%
+    summarise(
+        max_similarity = max(cosine_similarity),
+        min_similarity = min(cosine_similarity),
+        max_idx = which.max(cosine_similarity),
+        match_doc = other_doc_name[max_idx],
+        match_cat = other_category[max_idx],
+        .groups = 'drop'
+    ) %>%
+    select(-max_idx) %>%
+    filter(max_similarity >= similarity_threshold & max_similarity < 0.8) %>%
+    mutate(
+        doc_numeric_id = as.numeric(str_extract(ld_doc_name, "\\d+"))
+    ) %>%
+    arrange(doc_numeric_id) %>%
+    mutate(gap_type = "Cross-Policy_Document")
+
+```
+
+
+```{r, echo=FALSE}
+similarity_stats %>% 
     DT::datatable(
         options = list(
             dom = 'Bfrtip',
@@ -348,10 +381,11 @@ doc_embedding_similarity_stats %>%
 
 
 #### Unique SLD Policy Documents
+*Lower similarity scores indicate greater uniqueness*
 
-```{r}
-doc_embedding_similarity_LD_Unique %>%
-    select(-ld_text_preview) %>%
+```{r, echo=FALSE}
+LD_Unique %>%
+    select(ld_doc_name, min_similarity, max_similarity, match_doc, match_cat, gap_type) %>%
     DT::datatable(
         options = list(
             dom = 'Bfrtip',
@@ -362,16 +396,17 @@ doc_embedding_similarity_LD_Unique %>%
         extensions = 'Buttons',
         class = "cell-border stripe",
         rownames = FALSE
-    )%>%
-    DT::formatRound(columns = c("max_similarity"), digits = 3)
+    ) %>%
+    DT::formatRound(columns = c("min_similarity", "max_similarity"), digits = 3)
 ```
 
-#### Missing from LD Policy Documents
+#### Missing from SLD Policy Documents
+*Lower similarity scores indicate content missing from SLD policies*
 
-```{r}
-doc_embedding_similarity_missing_from_ld %>%
-    select(-other_text_preview) %>% 
+```{r, echo=FALSE}
+missing_from_ld %>%
     arrange(doc_numeric_id) %>%
+    select(other_doc_name, min_similarity, max_similarity, match_sld, other_category, gap_type) %>%
     DT::datatable(
         options = list(
             dom = 'Bfrtip',
@@ -383,14 +418,15 @@ doc_embedding_similarity_missing_from_ld %>%
         class = "cell-border stripe",
         rownames = FALSE
     ) %>%
-    DT::formatRound(columns = c("max_ld_similarity"), digits = 3)
+    DT::formatRound(columns = c("min_similarity", "max_similarity"), digits = 3)
 ```
 
-#### SLD Policy Integration
+#### Cross Policy
+*Similarity scores between 0.6-0.8 indicate cross-policy learning potential*
 
 ```{r}
-doc_embedding_similarity_policy_integration %>%
-    select(-ld_text_preview) %>% 
+cross_policy %>%
+    select(ld_doc_name, min_similarity, max_similarity, match_doc, match_cat, gap_type) %>%
     DT::datatable(
         options = list(
             dom = 'Bfrtip',
@@ -402,56 +438,15 @@ doc_embedding_similarity_policy_integration %>%
         class = "cell-border stripe",
         rownames = FALSE
     ) %>%
-    DT::formatRound(columns = c("max_similarity"), digits = 3)
+    DT::formatRound(columns = c("min_similarity", "max_similarity"), digits = 3)
 ```
 
 
-#### All Topics from SLD, Disability, and General Categories
+### Topic-Level Analysis
+
+#### Topic-Level Similarity Heatmap
 
 ```{r, eval=FALSE}
-tokens <- preprocess_texts(united_tbl, text_field = "united_texts", verbose = FALSE)
-
-tokens_collocations <- detect_multi_word_expressions(tokens, size = 2:5, min_count = 2)
-tokens_dict <- quanteda::dictionary(
-  list(
-    custom = c(
-      "access to",
-      "ai systems",
-      "artificial intelligence",
-      "assistive technology",
-      "automated systems",
-      "best practices",
-      "civil rights",
-      "decision making",
-      "developers should",
-      "educational settings",
-      "federal government",
-      "intelligence systems",
-      "learning disability",
-      "learning disabilities",
-      "machine learning",
-      "safety institute",
-      "school district",
-      "students with disabilities",
-      "virtual environments"
-    )
-  )
-)
-
-compound_tokens <- function(tokens, dict) {
-  quanteda::tokens_compound(
-    tokens,
-    pattern = dict,
-    concatenator = "_",
-    valuetype = "glob",
-    window = 0,
-    case_insensitive = TRUE,
-    join = TRUE,
-    keep_unigrams = FALSE,
-    verbose = TRUE
-  )
-}
-
 data <- data %>%
   mutate(
     category = case_when(
@@ -460,13 +455,6 @@ data <- data %>%
       disability == "No" & SLD == "No" ~ "General",
       TRUE ~ "Uncategorized"
     )
-  )
-
-document_summary <- data %>%
-  group_by(category) %>%
-  summarise(
-    document_count = n(),
-    .groups = 'drop'
   )
 
 ld_docs <- data %>% 
@@ -585,6 +573,10 @@ top_labeled_ld$category <- "SLD"
 top_labeled_disability$category <- "Other Disability"
 top_labeled_general$category <- "General"
 
+top_labeled_ld <- top_labeled_ld %>% mutate(topic = as.numeric(topic)) %>% arrange(topic)
+top_labeled_disability <- top_labeled_disability %>% mutate(topic = as.numeric(topic)) %>% arrange(topic)
+top_labeled_general <- top_labeled_general %>% mutate(topic = as.numeric(topic)) %>% arrange(topic)
+
 gamma_ld <- data.frame(
   topic = 1:length(topic_model_ld$theta[1,]),
   gamma = colMeans(topic_model_ld$theta),
@@ -609,7 +601,8 @@ all_labeled_topics <- bind_rows(top_labeled_ld, top_labeled_disability, top_labe
   left_join(all_gamma, by = c("topic", "category")) %>%
   mutate(
     topic_gamma = paste0("Topic ", topic, " (", round(gamma, 3), ")")
-  )
+  ) %>%
+  arrange(category, topic)  
 
 get_topic_texts <- function(top_terms_df) {
   top_terms_df %>%
@@ -636,6 +629,7 @@ calculate_topic_embedding_similarity <- function(emb1, emb2, labels1, labels2, c
   norm_emb1 <- emb1 / sqrt(rowSums(emb1^2))
   norm_emb2 <- emb2 / sqrt(rowSums(emb2^2))
   similarity_matrix <- norm_emb1 %*% t(norm_emb2)
+  
   similarity_df <- expand_grid(
     topic1 = 1:nrow(norm_emb1),
     topic2 = 1:nrow(norm_emb2)
@@ -651,9 +645,15 @@ calculate_topic_embedding_similarity <- function(emb1, emb2, labels1, labels2, c
   return(similarity_df)
 }
 
-ld_labels <- top_labeled_ld$topic_label
-disability_labels <- top_labeled_disability$topic_label
-general_labels <- top_labeled_general$topic_label
+ld_labels <- top_labeled_ld %>%
+  arrange(topic) %>%
+  pull(topic_label)
+disability_labels <- top_labeled_disability %>%
+  arrange(topic) %>%
+  pull(topic_label)
+general_labels <- top_labeled_general %>%
+  arrange(topic) %>%
+  pull(topic_label)
 
 ld_vs_disability_cosine <- calculate_topic_embedding_similarity(
   ld_topic_emb, disability_topic_emb,
@@ -672,62 +672,225 @@ ld_focused_similarities <- bind_rows(
   ld_vs_general_cosine
 )
 
-LD_Unique_topics <- ld_focused_similarities %>%
-  group_by(topic1, label1) %>%
+topic_similarities <- ld_focused_similarities %>%
+  left_join(
+    top_labeled_ld %>% 
+      arrange(topic) %>%
+      select(topic, topic_label) %>%
+      rename(ld_topic_label = topic_label),
+    by = c("topic1" = "topic")
+  ) %>%
+  mutate(
+    ld_topic_name = paste("Topic", topic1),
+    other_topic_name = paste("Topic", topic2),
+    ld_topic_id = label1,
+    other_topic_id = label2,
+    other_category = cat2
+  ) %>%
+  left_join(
+    top_labeled_disability %>% 
+      arrange(topic) %>%
+      select(topic, topic_label) %>%
+      rename(disability_topic_label = topic_label),
+    by = c("topic2" = "topic")
+  ) %>%
+  left_join(
+    top_labeled_general %>% 
+      arrange(topic) %>%
+      select(topic, topic_label) %>%
+      rename(general_topic_label = topic_label),
+    by = c("topic2" = "topic")
+  ) %>%
+  mutate(
+    other_topic_label = case_when(
+      cat2 == "Other Disability" ~ disability_topic_label,
+      cat2 == "General" ~ general_topic_label,
+      TRUE ~ as.character(topic2)
+    )
+  ) %>%
+  select(
+    ld_topic_name, other_topic_name, ld_topic_id, other_topic_id,
+    ld_topic_label, other_topic_label, cosine_similarity, other_category
+  ) %>%
+  mutate(
+    other_category = factor(other_category, levels = c("Other Disability", "General"))
+  )
+
+topic_similarities <- topic_similarities %>%
+  distinct(ld_topic_name, other_topic_name, other_category, .keep_all = TRUE)
+
+create_topic_heatmap <- function(similarities, title_suffix = "") {
+  
+  plot_data <- similarities %>%
+    mutate(
+      ld_label = str_trunc(ld_topic_name, 25),
+      other_label = str_trunc(other_topic_name, 25)
+    )
+  
+  plot_data <- plot_data %>%
+    mutate(
+      ld_numeric_id = ld_topic_id,
+      other_numeric_id = other_topic_id
+    )
+  
+  ld_order <- plot_data %>%
+    arrange(ld_numeric_id) %>%
+    pull(ld_label) %>%
+    unique()
+  
+  other_order <- plot_data %>%
+    arrange(other_numeric_id) %>%
+    pull(other_label) %>%
+    unique()
+  
+  plot_data <- plot_data %>%
+    mutate(
+      ld_label = factor(ld_label, levels = rev(ld_order)),  
+      other_label = factor(other_label, levels = other_order),
+      tooltip_text = paste0(
+        "SLD: ", ld_topic_label,
+        "<br>", other_category, ": ", other_topic_label,
+        "<br>Cosine Similarity: ", round(cosine_similarity, 3)
+      )
+    )
+  
+  ggplot(plot_data, aes(x = other_label, y = ld_label, fill = cosine_similarity, text = tooltip_text)) +
+    geom_tile(color = "white", size = 0.1) +
+    geom_text(aes(label = round(cosine_similarity, 2), 
+                  color = ifelse(cosine_similarity > quantile(cosine_similarity, 0.75), "black", "white")), 
+              size = 3.5, fontface = "bold", show.legend = FALSE) +
+    scale_fill_viridis_c(name = "Cosine\nSimilarity", option = "plasma") +
+    scale_color_identity() +  
+    guides(color = "none") + 
+    facet_wrap(~other_category, scales = "free", ncol=1) +
+    theme_minimal(base_size = 11) +
+    theme(
+      strip.text.x = element_text(size = 11, color = "#3B3B3B"), 
+      axis.text.x = element_text(angle = 45, hjust = 1, size = 10),
+      axis.text.y = element_text(size = 10),
+      axis.title.x = element_blank(),
+      axis.text.x.top = element_text(size = 12),
+      legend.title = element_text(size = 11, color = "#3B3B3B"),
+      legend.text = element_text(size = 11, color = "#3B3B3B"),
+      plot.title = element_text(size = 10, hjust = 0.5)
+    ) + labs(y = "SLD Topics")
+}
+
+
+topic_similarity_heatmap <- create_topic_heatmap(topic_similarities, "SLD Topics Focus")
+
+topic_similarity_heatmap_plotly <- topic_similarity_heatmap %>% 
+  ggplotly(tooltip = "text", width = 800, height = 1000) %>% 
+  layout(hovermode = "closest") %>%
+  style(hoverinfo = "text")
+```
+
+```{r, echo=FALSE}
+topic_similarity_heatmap_plotly
+```
+
+```{r, eval=FALSE}
+topic_similarity_stats <- topic_similarities %>%
+  group_by(other_category) %>%
+  summarise(
+    mean_similarity = round(mean(cosine_similarity), 3),
+    median_similarity = round(median(cosine_similarity), 3),
+    sd_similarity = round(sd(cosine_similarity), 3),
+    min_similarity = round(min(cosine_similarity), 3),
+    max_similarity = round(max(cosine_similarity), 3),
+    .groups = 'drop'
+  ) %>%
+  arrange(other_category)
+
+topic_similarity_threshold <- 0.6
+
+LD_Unique_topics <- topic_similarities %>%
+  group_by(ld_topic_name, ld_topic_label) %>%
   summarise(
     max_similarity = max(cosine_similarity),
+    min_similarity = min(cosine_similarity),
+    max_idx = which.max(cosine_similarity),
+    match_topic = other_topic_name[max_idx],
+    match_cat = other_category[max_idx],
     .groups = 'drop'
   ) %>%
-  filter(max_similarity < 0.3) %>%  
-  mutate(gap_type = "LD_Unique_Strength") %>%
-  distinct(label1, .keep_all = TRUE)
-
-missing_from_ld_topics <- ld_focused_similarities %>%
-  group_by(topic2, label2, cat2) %>%
-  summarise(
-    max_ld_similarity = max(cosine_similarity),
-    .groups = 'drop'
+  select(-max_idx) %>%
+  filter(max_similarity < topic_similarity_threshold) %>%  
+  mutate(
+    topic_numeric_id = as.numeric(str_extract(ld_topic_name, "\\d+"))
   ) %>%
-  filter(max_ld_similarity < 0.3) %>%
-  mutate(gap_type = "Missing_from_LD") %>%
-  distinct(label2, .keep_all = TRUE)
+  arrange(topic_numeric_id) %>%
+  mutate(gap_type = "LD_Unique_Strength")
 
-policy_integration_topics <- ld_focused_similarities %>%
-  group_by(topic1, label1) %>%
+missing_from_ld_topics <- topic_similarities %>%
+  group_by(other_topic_name, other_topic_label, other_category) %>%
   summarise(
     max_similarity = max(cosine_similarity),
-    best_match_category = cat2[which.max(cosine_similarity)],
-    best_match_topic = label2[which.max(cosine_similarity)],
+    min_similarity = min(cosine_similarity),
+    max_idx = which.max(cosine_similarity),
+    match_sld = ld_topic_name[max_idx],
     .groups = 'drop'
   ) %>%
-  filter(max_similarity >= 0.3 & max_similarity < 0.6) %>%
-  mutate(gap_type = "LD_Needs_Integration") %>%
-  distinct(label1, .keep_all = TRUE)
+  select(-max_idx) %>%
+  filter(max_similarity < topic_similarity_threshold) %>%
+  mutate(
+    topic_numeric_id = as.numeric(str_extract(other_topic_name, "\\d+"))
+  ) %>%
+  arrange(topic_numeric_id) %>%
+  mutate(gap_type = "Missing_from_LD")
 
-ld_priority_gaps <- bind_rows(
-  LD_Unique_topics %>% 
-    mutate(priority = "High - Preserve LD-specific policies") %>%
-    select(topic = label1, priority, gap_type),
-  
-  missing_from_ld_topics %>%
-    mutate(priority = paste("High - Missing from LD (found in", cat2, ")")) %>%
-    select(topic = label2, priority, gap_type),
-  
-  policy_integration_topics %>%
-    mutate(priority = paste("Medium - Needs integration with", best_match_category)) %>%
-    select(topic = label1, priority, gap_type)
-) %>%
-  distinct(topic, .keep_all = TRUE)
+cross_policy_topics <- topic_similarities %>%
+  group_by(ld_topic_name, ld_topic_label) %>%
+  summarise(
+    max_similarity = max(cosine_similarity),
+    min_similarity = min(cosine_similarity),
+    max_idx = which.max(cosine_similarity),
+    match_topic = other_topic_name[max_idx],
+    match_cat = other_category[max_idx],
+    .groups = 'drop'
+  ) %>%
+  select(-max_idx) %>%
+  filter(max_similarity >= topic_similarity_threshold & max_similarity < 0.8) %>%
+  mutate(
+    topic_numeric_id = as.numeric(str_extract(ld_topic_name, "\\d+"))
+  ) %>%
+  arrange(topic_numeric_id) %>%
+  mutate(gap_type = "Cross-Policy_Learning")
 ```
 
 
 ```{r, echo=FALSE}
 all_labeled_topics %>%
-  group_by(category, topic_gamma, topic_label) %>%
+  mutate(
+    topic = as.numeric(topic),  
+    topic_gamma = paste0("Topic ", topic, " (", round(gamma, 3), ")")
+  ) %>%
+  arrange(category, topic) %>%
+  group_by(category, topic, topic_gamma, topic_label) %>%
   summarise(
     top_terms = paste(paste0(term, " (", round(beta, 3), ")"), collapse = ", "),
     .groups = 'drop'
   ) %>%
+  arrange(category, topic) %>%
+  select(-topic) %>%  
+  DT::datatable(
+      options = list(
+          dom = 'Bfrtip',
+          buttons = c('copy', 'excel', 'pdf'),
+          pageLength = 10,
+          scrollX = TRUE,
+          order = list()  
+      ),
+      extensions = 'Buttons',
+      class = "cell-border stripe",
+      rownames = FALSE
+  )
+```
+
+#### Topic-Level Similarity Statistics Table
+
+```{r, echo=FALSE}
+topic_similarity_stats %>% 
     DT::datatable(
         options = list(
             dom = 'Bfrtip',
@@ -741,10 +904,13 @@ all_labeled_topics %>%
     )
 ```
 
-#### SLD Policy Gaps Based on Topic Similarity
+
+#### Unique Topics from SLD Policies
+*Lower similarity scores indicate greater uniqueness*
 
 ```{r}
-ld_priority_gaps |>
+LD_Unique_topics %>%
+    select(-gap_type, -match_topic, -topic_numeric_id) %>%
     DT::datatable(
         options = list(
             dom = 'Bfrtip',
@@ -755,148 +921,50 @@ ld_priority_gaps |>
         extensions = 'Buttons',
         class = "cell-border stripe",
         rownames = FALSE
-    )
+    ) %>% 
+    DT::formatRound(columns = c("min_similarity", "max_similarity"), digits = 3)
 ```
 
-#### Topic Similarity Heatmaps
+#### Missing Topics from LD Policies
+*Lower similarity scores indicate content missing from SLD policies*
 
-```{r, eval=FALSE}
-calculate_cosine_similarity <- function(model1, model2, labels1, labels2, cat1, cat2) {
-  
-  beta1 <- exp(model1$beta$logbeta[[1]])
-  beta2 <- exp(model2$beta$logbeta[[1]])
-  
-  n_topics1 <- nrow(beta1)
-  n_topics2 <- nrow(beta2)
-  
-  similarity_matrix <- matrix(0, nrow = n_topics1, ncol = n_topics2)
-  
-  for(i in 1:n_topics1) {
-    for(j in 1:n_topics2) {
-      topic_i <- beta1[i, ]
-      topic_j <- beta2[j, ]
-      
-      dot_product <- sum(topic_i * topic_j)
-      magnitude_i <- sqrt(sum(topic_i^2))
-      magnitude_j <- sqrt(sum(topic_j^2))
-      
-      if(magnitude_i > 0 && magnitude_j > 0) {
-        similarity_matrix[i, j] <- dot_product / (magnitude_i * magnitude_j)
-      }
-    }
-  }
-  
-  similarity_df <- expand_grid(
-    topic1 = 1:n_topics1,
-    topic2 = 1:n_topics2
-  ) %>%
-    mutate(
-      label1 = labels1[topic1],
-      label2 = labels2[topic2],
-      cosine_similarity = as.vector(similarity_matrix),
-      cat1 = cat1,
-      cat2 = cat2,
-      comparison = paste(cat1, "vs", cat2)
-    )
-  
-  return(similarity_df)
-}
-
-ld_vs_disability_cosine <- calculate_cosine_similarity(
-  topic_model_ld, topic_model_disability, 
-  top_labeled_ld$topic_label, top_labeled_disability$topic_label,
-  "SLD", "Other Disability"
-)
-
-ld_vs_general_cosine <- calculate_cosine_similarity(
-  topic_model_ld, topic_model_general,
-  top_labeled_ld$topic_label, top_labeled_general$topic_label, 
-  "SLD", "General"
-)
-
-create_topic_heatmap <- function(similarity_data, title_suffix = "") {
-  
-  ld_labels <- top_labeled_ld$topic_label
-  disability_labels <- top_labeled_disability$topic_label
-  general_labels <- top_labeled_general$topic_label
-  
-  similarity_data <- similarity_data %>%
-    mutate(
-      label1 = paste("Topic", topic1),
-      label2 = paste("Topic", topic2),
-      ld_topic_label = ld_labels[topic1],
-      other_topic_label = case_when(
-        cat2 == "Other Disability" ~ disability_labels[topic2],
-        cat2 == "General" ~ general_labels[topic2],
-        TRUE ~ paste("Topic", topic2)
-      ),
-      tooltip_text = paste0(
-        "SLD: ", ld_topic_label,
-        "<br>", cat2, ": ", other_topic_label,
-        "<br>Cosine Similarity: ", round(cosine_similarity, 3)
-      )
+```{r}
+missing_from_ld_topics %>%
+    select(-gap_type, -topic_numeric_id) %>%
+    DT::datatable(
+        options = list(
+            dom = 'Bfrtip',
+            buttons = c('copy', 'excel', 'pdf'),
+            pageLength = 10,
+            scrollX = TRUE
+        ),
+        extensions = 'Buttons',
+        class = "cell-border stripe",
+        rownames = FALSE
     ) %>%
-    mutate(
-      label1 = factor(label1, levels = paste("Topic", sort(unique(topic1)))),
-      label2 = factor(label2, levels = paste("Topic", sort(unique(topic2))))
-    )
-  
-  ggplot(similarity_data, aes(x = label2, y = label1, 
-                             fill = cosine_similarity, text = tooltip_text)) +
-    geom_tile(color = "white", size = 0.1) +
-    geom_text(aes(label = round(cosine_similarity, 2), 
-                  color = ifelse(cosine_similarity > quantile(cosine_similarity, 0.75), "black", "white")), 
-              size = 3.5, fontface = "bold", show.legend = FALSE) +
-    scale_fill_viridis_c(
-      name = "Cosine\nSimilarity",
-      option = "plasma",
-      limits = c(min(similarity_data$cosine_similarity), max(similarity_data$cosine_similarity))
-    ) +
-    scale_color_identity() +
-    guides(color = "none") +
-    theme_minimal() +
-    theme(
-      axis.text.x = element_text(angle = 45, hjust = 1, size = 10), 
-      axis.text.y = element_text(size = 10),                        
-      # axis.title.x = element_blank(),                               
-      axis.title.y = element_text(size = 12),                      
-      plot.title = element_text(size = 14, hjust = 0.5),            
-      plot.subtitle = element_text(size = 12, hjust = 0.5),         
-      legend.title = element_text(size = 11),                        
-      legend.text = element_text(size = 10),                       
-      strip.text = element_text(size = 10)                           
-    ) +
-    labs(
-      # title = paste("LD Policy Similarity:", title_suffix),
-      x = paste(unique(similarity_data$cat2), "Topics"),
-      y = "SLD Topics"
-    )
-}
-
-ld_vs_disability <- create_topic_heatmap(
-  ld_vs_disability_cosine, "SLD vs Disability"
-)
-
-ld_vs_disability_plotly <- ld_vs_disability %>% ggplotly(tooltip = "text") %>% 
-  layout(hovermode = "closest") %>%
-  style(hoverinfo = "text")
-
-ld_vs_general <- create_topic_heatmap(
-  ld_vs_general_cosine, "SLD vs General"
-)
-
-ld_vs_general_plotly <- ld_vs_general %>% ggplotly(tooltip = "text") %>% 
-  layout(hovermode = "closest") %>%
-  style(hoverinfo = "text")
+    DT::formatRound(columns = c("min_similarity", "max_similarity"), digits = 3)
 ```
 
-```{r, echo=FALSE}
-ld_vs_disability_plotly
+#### Cross-Policy Learning Opportunities
+*Similarity scores between 0.6-0.8 indicate cross-policy learning potential*
+
+```{r}
+cross_policy_topics %>%
+    select(-gap_type, -match_topic, -topic_numeric_id) %>%
+    DT::datatable(
+        options = list(
+            dom = 'Bfrtip',
+            buttons = c('copy', 'excel', 'pdf'),
+            pageLength = 10,
+            scrollX = TRUE
+        ),
+        extensions = 'Buttons',
+        class = "cell-border stripe",
+        rownames = FALSE
+    ) %>%
+    DT::formatRound(columns = c("min_similarity", "max_similarity"), digits = 3)
 ```
 
-```{r, echo=FALSE}
-ld_vs_general_plotly
-```
 
 ## Round 1 Delphi Survey
 
@@ -995,7 +1063,49 @@ multi_tbl_ft %>%
 #### Word Frequency
 
 ```{r, eval=FALSE}
-#| code-fold: false
+tokens <- preprocess_texts(united_tbl, text_field = "united_texts", verbose = FALSE)
+
+tokens_collocations <- detect_multi_word_expressions(tokens, size = 2:5, min_count = 2)
+tokens_dict <- quanteda::dictionary(
+  list(
+    custom = c(
+      "access to",
+      "ai systems",
+      "artificial intelligence",
+      "assistive technology",
+      "automated systems",
+      "best practices",
+      "civil rights",
+      "decision making",
+      "developers should",
+      "educational settings",
+      "federal government",
+      "intelligence systems",
+      "learning disability",
+      "learning disabilities",
+      "machine learning",
+      "safety institute",
+      "school district",
+      "students with disabilities",
+      "virtual environments"
+    )
+  )
+)
+
+compound_tokens <- function(tokens, dict) {
+  quanteda::tokens_compound(
+    tokens,
+    pattern = dict,
+    concatenator = "_",
+    valuetype = "glob",
+    window = 0,
+    case_insensitive = TRUE,
+    join = TRUE,
+    keep_unigrams = FALSE,
+    verbose = TRUE
+  )
+}
+
 tokens_compound <- compound_tokens(tokens, tokens_dict)
 dfm_object <- dfm(tokens_compound)
 
@@ -1009,7 +1119,6 @@ word_frequency_plot
 #### Remove Predefined Stopwords
 
 ```{r, eval=FALSE}
-#| code-fold: false
 toks_removed <- tokens_remove(tokens_compound, pattern = stopwords, verbose = FALSE)
 dfm_init <- dfm(toks_removed)
 word_frequency_remove_stopwords <- plot_word_frequency(dfm_init, n = 20)
@@ -1022,7 +1131,6 @@ word_frequency_remove_stopwords
 #### Remove Common Words in the Dataset
 
 ```{r, eval=FALSE}
-#| code-fold: false
 common_words <- c("na", "may", "can", "[''']s")
 toks_removed_common <- tokens_remove(toks_removed, 
                                      pattern = common_words, 
@@ -1039,7 +1147,6 @@ word_frequency_remove_common
 #### Lemmatize Tokens
 
 ```{r, eval=FALSE}
-#| code-fold: false
 texts <- sapply(toks_removed_common, paste, collapse = " ")
 parsed <- spacy_parse(x = texts, lemma = TRUE, entity = FALSE, pos = FALSE)
 toks_lemmatized <- as.tokens(parsed, use_lemma = TRUE)
@@ -1054,7 +1161,6 @@ word_frequency_lemmatized
 #### Model Diagnostics (Optimal Topic Numbers)
 
 ```{r, eval=FALSE}
-#| code-fold: false
 texts <- sapply(toks_removed_common, paste, collapse = " ")
 parsed <- spacy_parse(x = texts, lemma = TRUE, entity = FALSE, pos = FALSE)
 toks_lemmatized <- as.tokens(parsed, use_lemma = TRUE)
@@ -2073,14 +2179,16 @@ final_policy_items %>%
 ```
 
 ```{r, echo=FALSE}
-save(single_tbl_ft, multi_tbl_ft,
+save(document_summary,
+     single_tbl_ft, multi_tbl_ft,
      all_labeled_topics,
-     doc_embedding_similarity, similarity_heatmap_plotly,
+     ld_similarities, 
+     similarity_stats, LD_Unique, missing_from_ld, cross_policy,
+     similarity_heatmap, similarity_heatmap_plotly,
      dfm_ld, dfm_disability, dfm_general, topic_model_ld, topic_model_disability, topic_model_general,
      ld_vs_disability_plotly, ld_vs_general_plotly, 
-     doc_embedding_similarity_stats, doc_embedding_similarity_LD_Unique, 
-     doc_embedding_similarity_missing_from_ld, doc_embedding_similarity_policy_integration,
-     LD_Unique_topics, missing_from_ld_topics, policy_integration_topics, ld_priority_gaps,
+     topic_similarities, topic_similarity_stats, topic_similarity_heatmap, topic_similarity_heatmap_plotly,
+     LD_Unique_topics, missing_from_ld_topics, cross_policy_topics, ld_priority_gaps,
      delphi_long, delphi_long_2, dfm, word_frequency_plot, word_frequency_remove_stopwords, word_frequency_remove_common,
      word_frequency_lemmatized, toks_removed_common, toks_removed, toks_lemmatized,
      dfm_object, dfm_removed, dfm_init, tokens_compound, tokens_collocations,
