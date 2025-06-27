@@ -781,7 +781,10 @@ topic_similarity_heatmap <- create_topic_heatmap(topic_similarities, "SLD Topics
 
 topic_similarity_heatmap_plotly <- topic_similarity_heatmap %>% 
   ggplotly(tooltip = "text", width = 800, height = 1000) %>% 
-  layout(hovermode = "closest") %>%
+  layout(
+    hovermode = "closest",
+    margin = list(b = 70)  
+  ) %>%
   style(hoverinfo = "text")
 ```
 
