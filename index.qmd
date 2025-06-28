@@ -604,6 +604,14 @@ all_labeled_topics <- bind_rows(top_labeled_ld, top_labeled_disability, top_labe
   ) %>%
   arrange(category, topic)  
 
+all_labeled_topics <- all_labeled_topics %>%
+  mutate(
+    topic = as.numeric(topic),  # Ensure topic is numeric
+    topic_label_with_gamma = paste0(
+      topic, ". ", topic_label, " (", round(gamma, 3), ")"
+    )
+  )
+
 get_topic_texts <- function(top_terms_df) {
   top_terms_df %>%
     group_by(topic) %>%
@@ -864,25 +872,22 @@ cross_policy_topics <- topic_similarities %>%
 
 ```{r, echo=FALSE}
 all_labeled_topics %>%
-  mutate(
-    topic = as.numeric(topic),  
-    topic_gamma = paste0("Topic ", topic, " (", round(gamma, 3), ")")
-  ) %>%
   arrange(category, topic) %>%
-  group_by(category, topic, topic_gamma, topic_label) %>%
+  mutate(topics = topic_label_with_gamma,
+         category = factor(category, levels = c("SLD", "Other Disability", "General"))) %>%
+  select(-topic_label_with_gamma) %>%
+  group_by(category, topics) %>%
   summarise(
     top_terms = paste(paste0(term, " (", round(beta, 3), ")"), collapse = ", "),
     .groups = 'drop'
   ) %>%
-  arrange(category, topic) %>%
-  select(-topic) %>%  
   DT::datatable(
       options = list(
           dom = 'Bfrtip',
           buttons = c('copy', 'excel', 'pdf'),
           pageLength = 10,
           scrollX = TRUE,
-          order = list()  
+          order = list()
       ),
       extensions = 'Buttons',
       class = "cell-border stripe",
