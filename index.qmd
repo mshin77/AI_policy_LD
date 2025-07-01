@@ -11,11 +11,52 @@ format:
 
 The website contains supplemental materials and code used to analyze text data in Authors (2025).
 
+::: panel-tabset
+
+## Flowchart
+
+#### Flowchart of Data Collection and Analysis
+
+```{mermaid}
+flowchart TD
+    n1["Policy Documents Analysis<br/>N=32 documents<br/>3 categories"] --> D["Text Preprocessing<br/>• Tokenization<br/>• Stopword Removal<br/>• Lemmatization"] & B["Delphi Round 1<br/>N=20 experts"]
+    B --> C["Delphi Round 2<br/>N=14 experts"] & K1["Expert Validation<br/>After Delphi Round 1"]
+    D --> E["Document Categorization<br/>• SLD Policies<br/>• Other Disability Policies<br/>• General AI Policies"]
+    E --> F["Document Embeddings<br/>Sentence-BERT<br/>all-MiniLM-L6-v2"] & G["Topic Modeling<br/>Structural Topic Model<br/>K=10 topics per category"]
+    F --> H["Similarity Analysis<br/>Cosine Similarity<br/>Threshold: 0.6"]
+    G --> I["Topic Label Generation<br/>GPT-3.5-Turbo<br/>Temperature: 0.5"]
+    H --> P["Cross-Category Theme Comparison<br/>• SLD vs Other Disability<br/>• SLD vs General Policies"]
+    P --> Q["Gap Identification<br/>• Unique SLD Themes<br/>• Missing Elements<br/>• Cross-Policy Opportunities"]
+    I --> J["Survey Item Generation<br/>GPT-3.5-Turbo<br/>Temperature: 0"]
+    C --> K2["Expert Validation<br/>After Delphi Round 2"]
+    K1 --> L["Content Validity<br/>Lawshe's CVR Method"]
+    K2 --> L
+    
+    classDef dataPhase fill:#f8f9ff,stroke:#4a5568,stroke-width:2px,color:#2d3748
+    classDef processPhase fill:#f7fdf7,stroke:#38a169,stroke-width:2px,color:#2d3748
+    classDef analysisPhase fill:#fffaf0,stroke:#ed8936,stroke-width:2px,color:#2d3748
+    classDef validationPhase fill:#fef5f7,stroke:#d53f8c,stroke-width:2px,color:#2d3748
+    
+    n1:::processPhase
+    D:::processPhase
+    B:::dataPhase
+    C:::dataPhase
+    K1:::validationPhase
+    E:::processPhase
+    F:::analysisPhase
+    G:::analysisPhase
+    H:::analysisPhase
+    I:::analysisPhase
+    P:::analysisPhase
+    Q:::analysisPhase
+    J:::analysisPhase
+    K2:::validationPhase
+    L:::validationPhase
+```
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 ```
-
-::: panel-tabset
 
 ## Set Up
 
@@ -66,7 +107,7 @@ data <- read_excel("data/policyData.xlsx")
 load("data/ai_ld_data.rda")
 ```
 
-## Policy Document Analysis
+## Document Analysis
 
 ### Document-Level Analysis
 
@@ -974,7 +1015,7 @@ cross_policy_topics %>%
 ```
 
 
-## Round 1 Delphi Survey
+## Round 1 
 
 #### Participants
 
@@ -1738,7 +1779,7 @@ round_1_dist_plotly <- plotly::ggplotly(round_1_dist_plot, width = 800, height =
 round_1_dist_plotly
 ```
 
-## Round 2 Delphi Survey
+## Round 2 
 
 #### Round 2 Delphi Survey Item Development
 
@@ -2194,9 +2235,8 @@ save(document_summary,
      similarity_stats, LD_Unique, missing_from_ld, cross_policy,
      similarity_heatmap, similarity_heatmap_plotly,
      dfm_ld, dfm_disability, dfm_general, topic_model_ld, topic_model_disability, topic_model_general,
-     ld_vs_disability_plotly, ld_vs_general_plotly, 
      topic_similarities, topic_similarity_stats, topic_similarity_heatmap, topic_similarity_heatmap_plotly,
-     LD_Unique_topics, missing_from_ld_topics, cross_policy_topics, ld_priority_gaps,
+     LD_Unique_topics, missing_from_ld_topics, cross_policy_topics, 
      delphi_long, delphi_long_2, dfm, word_frequency_plot, word_frequency_remove_stopwords, word_frequency_remove_common,
      word_frequency_lemmatized, toks_removed_common, toks_removed, toks_lemmatized,
      dfm_object, dfm_removed, dfm_init, tokens_compound, tokens_collocations,
@@ -2209,8 +2249,7 @@ save(document_summary,
      topic_model_round_1, top_labeled_topic_terms_round_1, policy_survey_items_round_1_td, 
      round_2_results, round_2_results_label, round_2_plot, round_2_plotly, 
      round_2_dist, round_2_dist_plot, round_2_dist_plotly,
-     top_labeled_topic_terms_round_2,
-     policy_survey_items_round_2_td, item_percentages,
+     item_percentages,
      file = "data/ai_ld_data.rda")
 ```
 
