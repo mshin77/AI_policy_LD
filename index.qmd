@@ -19,23 +19,34 @@ The website contains supplemental materials and code used to analyze text data i
 
 ```{mermaid}
 flowchart TD
-    n1["Policy Documents Analysis<br/>N=32 documents<br/>3 categories"] --> D["Text Preprocessing<br/>• Tokenization<br/>• Stopword Removal<br/>• Lemmatization"] & B["Delphi Round 1<br/>N=20 experts"]
-    B --> C["Delphi Round 2<br/>N=14 experts"] & K1["Expert Validation<br/>After Delphi Round 1"]
-    D --> E["Document Categorization<br/>• SLD Policies<br/>• Other Disability Policies<br/>• General AI Policies"]
-    E --> F["Document Embeddings<br/>Sentence-BERT<br/>all-MiniLM-L6-v2"] & G["Topic Modeling<br/>Structural Topic Model<br/>K=10 topics per category"]
+    n1["Policy Documents Analysis<br/>N=12 documents<br/>3 categories"] --> D["Document Categorization<br/>• SLD Policies<br/>• Other Disability Policies<br/>• General AI Policies"]
+    D --> E["Text Preprocessing<br/>• Tokenization<br/>• Stopword Removal<br/>• Lemmatization"]
+    E --> F["Text Embeddings<br/>Sentence-BERT<br/>all-MiniLM-L6-v2"] & G["Topic Modeling<br/>Structural Topic Model<br/>K=10 topics per category"]
     F --> H["Similarity Analysis<br/>Cosine Similarity<br/>Threshold: 0.6"]
-    G --> I["Topic Label Generation<br/>GPT-3.5-Turbo<br/>Temperature: 0.5"]
+    G --> I["Topic Label Generation<br/>OpenAI's API<br/>'gpt-3.5-turbo'"]
+    I --> V1["Research Team Validation<br/>Topic Labels"]
+    F --> V1
     H --> P["Cross-Category Theme Comparison<br/>• SLD vs Other Disability<br/>• SLD vs General Policies"]
     P --> Q["Gap Identification<br/>• Unique SLD Themes<br/>• Missing Elements<br/>• Cross-Policy Opportunities"]
-    I --> J["Survey Item Generation<br/>GPT-3.5-Turbo<br/>Temperature: 0"]
+    n1 --> TP2["Text Preprocessing<br/>• Tokenization<br/>• Stopword Removal<br/>• Lemmatization"]
+    TP2 --> TM2["Topic Modeling<br/>Structural Topic Model"]
+    TM2 --> J["Survey Item Generation<br/>OpenAI's API<br/>'gpt-3.5-turbo'"]
+    J --> V3["Research Team Validation<br/>Survey Items"]
+    V3 --> B["Delphi Round 1<br/>N=17 experts"]
+    B --> C["Delphi Round 2<br/>N=14 experts"] & K1["Expert Validation<br/>After Delphi Round 1"]
     C --> K2["Expert Validation<br/>After Delphi Round 2"]
     K1 --> L["Content Validity<br/>Lawshe's CVR Method"]
     K2 --> L
+    L --> M["Final Policy Items<br/>N=36"]
+    M --> T["Theme Generation<br/>OpenAI's ChatGPT<br/>'gpt-4o'"]
+    T --> V2["Research Team Validation<br/>Theme Labels"]
     
     classDef dataPhase fill:#f8f9ff,stroke:#4a5568,stroke-width:2px,color:#2d3748
     classDef processPhase fill:#f7fdf7,stroke:#38a169,stroke-width:2px,color:#2d3748
     classDef analysisPhase fill:#fffaf0,stroke:#ed8936,stroke-width:2px,color:#2d3748
     classDef validationPhase fill:#fef5f7,stroke:#d53f8c,stroke-width:2px,color:#2d3748
+    classDef researchValidation fill:#f0f4ff,stroke:#6366f1,stroke-width:2px,color:#2d3748
+    classDef finalPhase fill:#e6fffa,stroke:#319795,stroke-width:2px,color:#2d3748
     
     n1:::processPhase
     D:::processPhase
@@ -47,12 +58,20 @@ flowchart TD
     G:::analysisPhase
     H:::analysisPhase
     I:::analysisPhase
+    T:::analysisPhase
+    TP2:::processPhase
+    TM2:::analysisPhase
+    V1:::researchValidation
+    V2:::researchValidation
+    V3:::researchValidation
     P:::analysisPhase
     Q:::analysisPhase
     J:::analysisPhase
     K2:::validationPhase
     L:::validationPhase
+    M:::finalPhase
 ```
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
@@ -1013,7 +1032,6 @@ cross_policy_topics %>%
     ) %>%
     DT::formatRound(columns = c("min_similarity", "max_similarity"), digits = 3)
 ```
-
 
 ## Round 1 
 
@@ -2199,7 +2217,7 @@ delphiSecondRanking %>%
         options = list(
             dom = 'Bfrtip',
             buttons = c('copy', 'excel', 'pdf'),
-            pageLength = 10,
+            pageLength = 5,
             scrollX = TRUE
         ),
         extensions = 'Buttons',
@@ -2208,23 +2226,23 @@ delphiSecondRanking %>%
     )
 ```
 
-#### Final Policy Items
+## Final Policy Items
 
 ```{r, echo=FALSE}
 final_policy_items <- read_excel("data/final_policy_items.xlsx")
 
 final_policy_items %>%
     DT::datatable(
-        rownames = FALSE,
-        extensions = 'Buttons',
         options = list(
-            scrollX = TRUE,
-            scrollY = "400px",
-            width = "80%",
             dom = 'Bfrtip',
-            buttons = c('copy', 'csv', 'excel', 'pdf', 'print')
-        )
-    ) 
+            buttons = c('copy', 'excel', 'pdf'),
+            pageLength = 20,
+            scrollX = TRUE
+        ),
+        extensions = 'Buttons',
+        class = "cell-border stripe",
+        rownames = FALSE
+    )
 ```
 
 ```{r, echo=FALSE}
