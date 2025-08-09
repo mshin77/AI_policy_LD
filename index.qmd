@@ -352,7 +352,7 @@ similarity_heatmap_plotly <- similarity_heatmap %>%
   style(hoverinfo = "text")
 ```
 
-### Policy Document Similarity Heatmap
+### Document-Level Similarity Heatmap
 
 ```{r, echo=FALSE}
 similarity_heatmap_plotly
