@@ -18,28 +18,32 @@ The website contains supplemental materials and code used to analyze text data i
 #### Flowchart of Data Collection and Analysis
 
 ```{mermaid}
+  %%{init: {
+    "flowchart": {"rankSpacing": 24},
+    "themeVariables": {"fontSize": "17px", "lineHeight": 1.1, "nodePadding": 6}
+  }}%%
 flowchart TD
-    n1["Policy Documents Analysis<br/>N = 12 Documents"] --> D["Document Categorization<br/>• SLD Policies<br/>• Other Disability Policies<br/>• General AI Policies"]
-    D --> E["Text Preprocessing<br/>• Tokenization<br/>• Stopword Removal<br/>• Lemmatization"]
-    E --> F["Text Embeddings<br/>Sentence-BERT<br/>all-MiniLM-L6-v2"] & G["Topic Modeling<br/>Structural Topic Model"]
-    F --> H["Similarity Analysis<br/>Cosine Similarity<br/>Threshold: 0.6"]
-    G --> I["Topic Label Generation<br/>OpenAI's API<br/>'gpt-3.5-turbo'"]
+    n1["Policy Documents Analysis<br/>N = 12 Documents"] --> D["Document Categorization"]
+    D --> E["Text Preprocessing"]
+    E --> F["Text Embeddings<br/>Sentence-BERT"] & G["Topic Modeling<br/>Structural Topic Model"]
+    F --> H["Similarity Analysis<br/>Cosine Similarity"]
+    G --> I["Topic Label Generation<br/>OpenAI's API"]
     I --> V1["Research Team Validation<br/>Topic Labels"]
     F --> V1
-    H --> P["Cross-Category Theme Comparison<br/>• SLD vs Other Disability<br/>• SLD vs General Policies"]
-    P --> Q["Gap Identification<br/>• Unique SLD Themes<br/>• Missing Elements<br/>• Cross-Policy Opportunities"]
-    n1 --> TP2["Text Preprocessing<br/>• Tokenization<br/>• Stopword Removal<br/>• Lemmatization"]
+    H --> P["Theme Comparison<br/>• SLD vs Other Disability<br/>• SLD vs General Policies"]
+    P --> Q["Gap Identification"]
+    n1 --> TP2["Text Preprocessing"]
     TP2 --> TM2["Topic Modeling<br/>Structural Topic Model"]
-    TM2 --> J["Survey Item Generation<br/>OpenAI's API<br/>'gpt-3.5-turbo'"]
+    TM2 --> J["Survey Item Generation<br/>OpenAI's API"]
     J --> V3["Research Team Validation<br/>Survey Items"]
     V3 --> B["Delphi Round 1<br/>N=17 Experts"]
     B --> C["Delphi Round 2<br/>N=14 Experts"] & K1["Expert Validation<br/>After Delphi Round 1"]
     C --> K2["Expert Validation<br/>After Delphi Round 2"]
     K1 --> L["Content Validity<br/>Lawshe's CVR Method"]
     K2 --> L
-    L --> STM3["Topic Modeling Refinement<br/>Structural Topic Model"]
+    L --> STM3["Topic Modeling<br/>Structural Topic Model"]
     STM3 --> M["Final Policy Items<br/>N=36 Items"]
-    M --> T["Theme Generation<br/>OpenAI's ChatGPT<br/>'gpt-4o'"]
+    M --> T["Theme Generation<br/>OpenAI's ChatGPT"]
     T --> V2["Research Team Validation<br/>Theme Labels"]
     
     classDef dataPhase fill:#f8f9ff,stroke:#4a5568,stroke-width:2px,color:#2d3748
