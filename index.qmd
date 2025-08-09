@@ -19,9 +19,9 @@ The website contains supplemental materials and code used to analyze text data i
 
 ```{mermaid}
 flowchart TD
-    n1["Policy Documents Analysis<br/>N=12 documents<br/>3 categories"] --> D["Document Categorization<br/>• SLD Policies<br/>• Other Disability Policies<br/>• General AI Policies"]
+    n1["Policy Documents Analysis<br/>N = 12 Documents"] --> D["Document Categorization<br/>• SLD Policies<br/>• Other Disability Policies<br/>• General AI Policies"]
     D --> E["Text Preprocessing<br/>• Tokenization<br/>• Stopword Removal<br/>• Lemmatization"]
-    E --> F["Text Embeddings<br/>Sentence-BERT<br/>all-MiniLM-L6-v2"] & G["Topic Modeling<br/>Structural Topic Model<br/>K=10 topics per category"]
+    E --> F["Text Embeddings<br/>Sentence-BERT<br/>all-MiniLM-L6-v2"] & G["Topic Modeling<br/>Structural Topic Model"]
     F --> H["Similarity Analysis<br/>Cosine Similarity<br/>Threshold: 0.6"]
     G --> I["Topic Label Generation<br/>OpenAI's API<br/>'gpt-3.5-turbo'"]
     I --> V1["Research Team Validation<br/>Topic Labels"]
@@ -32,12 +32,13 @@ flowchart TD
     TP2 --> TM2["Topic Modeling<br/>Structural Topic Model"]
     TM2 --> J["Survey Item Generation<br/>OpenAI's API<br/>'gpt-3.5-turbo'"]
     J --> V3["Research Team Validation<br/>Survey Items"]
-    V3 --> B["Delphi Round 1<br/>N=17 experts"]
-    B --> C["Delphi Round 2<br/>N=14 experts"] & K1["Expert Validation<br/>After Delphi Round 1"]
+    V3 --> B["Delphi Round 1<br/>N=17 Experts"]
+    B --> C["Delphi Round 2<br/>N=14 Experts"] & K1["Expert Validation<br/>After Delphi Round 1"]
     C --> K2["Expert Validation<br/>After Delphi Round 2"]
     K1 --> L["Content Validity<br/>Lawshe's CVR Method"]
     K2 --> L
-    L --> M["Final Policy Items<br/>N=36"]
+    L --> STM3["Topic Modeling Refinement<br/>Structural Topic Model"]
+    STM3 --> M["Final Policy Items<br/>N=36 Items"]
     M --> T["Theme Generation<br/>OpenAI's ChatGPT<br/>'gpt-4o'"]
     T --> V2["Research Team Validation<br/>Theme Labels"]
     
@@ -69,6 +70,7 @@ flowchart TD
     J:::analysisPhase
     K2:::validationPhase
     L:::validationPhase
+    STM3:::analysisPhase
     M:::finalPhase
 ```
 
@@ -350,6 +352,8 @@ similarity_heatmap_plotly <- similarity_heatmap %>%
   style(hoverinfo = "text")
 ```
 
+### Policy Document Similarity Heatmap
+
 ```{r, echo=FALSE}
 similarity_heatmap_plotly
 ```
@@ -503,8 +507,6 @@ cross_policy %>%
 
 
 ### Topic-Level Analysis
-
-#### Topic-Level Similarity Heatmap
 
 ```{r, eval=FALSE}
 data <- data %>%
@@ -855,6 +857,8 @@ topic_similarity_heatmap_plotly <- topic_similarity_heatmap %>%
   ) %>%
   style(hoverinfo = "text")
 ```
+
+#### Topic-Level Similarity Heatmap
 
 ```{r, echo=FALSE}
 topic_similarity_heatmap_plotly
